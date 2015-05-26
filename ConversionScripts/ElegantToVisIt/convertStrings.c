@@ -9,19 +9,30 @@
 #include "hdf5.h"
 #define FILE "clara-cen.h5"
 
-main() {
+int main( int argc, char *argv[] ) {
 
+  if ( argc != 3 ) /* argc should be 2 for correct execution */
+    {
+      printf( "usage: %s filename fieldname", argv[0] );
+    }
+  else
+    {
   hid_t       file_id, dataset_id, dataspace_id;
   hid_t       new_dataspace_id, new_dataset_id;  /* identifiers */
   hid_t       new_att_id, new_aspace_id;
   herr_t      status;
   char        ** rdata;
+  char        *filename, *fieldname, *outfieldname;
   hid_t       dtype, atype;
   size_t      size;
   int         ndims, dim_status, ndimptr, i, maxlen=0;
-//  file_id = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-  file_id = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
-  dataset_id = H5Dopen(file_id, "/page1/columns/ElementName");
+  filename=argv[1];
+  fieldname=argv[2];
+//  file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+  //  dataset_id = H5Dopen(file_id, "/page1/columns/ElementName");
+  dataset_id = H5Dopen(file_id, fieldname);
+  outfieldname=strcat(fieldname,"FixedLength");
   dataspace_id = H5Dget_space(dataset_id); 
   //  herr_t H5Sselect_all( hid_t dspace_id )
 //  dataspace_id = H5Screate (H5S_SCALAR);
@@ -49,10 +60,9 @@ main() {
   printf("status of H5Tset_size: %i",status);
   status = H5Tset_cset(dtype, H5T_CSET_ASCII);
   new_dataspace_id = H5Screate_simple( ndims, dimsize, maxdims );
-  //  space = H5Screate_simple (1, dimsize, NULL);
   printf ("H5Screate_simple returns: %i\n", dataspace_id);
-   
-  new_dataset_id = H5Dcreate(file_id, "/page1/columns/ElementNameFixedLength", dtype, new_dataspace_id, H5P_DEFAULT);
+  //  new_dataset_id = H5Dcreate(file_id, "/page1/columns/ElementNameFixedLength", dtype, new_dataspace_id, H5P_DEFAULT);
+  new_dataset_id = H5Dcreate(file_id, outfieldname, dtype, new_dataspace_id, H5P_DEFAULT);
   status = H5Tset_size (atype,0);
   status = H5Tset_cset (atype, H5T_CSET_ASCII);
   new_aspace_id=H5Screate(H5S_SCALAR);
@@ -82,4 +92,5 @@ main() {
   status = H5Dclose(dataset_id);
   status = H5Sclose(dataspace_id);
   status = H5Fclose(file_id);
+    }
 }
