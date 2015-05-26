@@ -1,0 +1,1 @@
+env LD_LIBRARY_PATH=/data/contrib/hdf5-1.8.12-ser/lib gcc  -fPIC -g -I/data/contrib/hdf5-1.8.12-ser/include/ -L/data/contrib/hdf5-1.8.12-ser/lib -D H5_USE_16_API -o cmpclstred cmpclstred.c -lhdf5 -lhdf5_hl -lz -lm -ldl
