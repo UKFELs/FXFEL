@@ -4,6 +4,10 @@ Created on Tue Oct 13 17:03:14 2015
 
 @author: piotrt
 """
+# The script converts MASP 3D output into 3D Puffin input.
+# The MASP format is:
+# x,px,y,py,z,pz, weight_of_particle
+
 # Import necessary libraries
 import tables
 import time
@@ -11,7 +15,7 @@ import numpy as np
 import csv
 import sys
 
-
+# Reade the name of the input file
 if len(sys.argv)==2:
    file_name_in=sys.argv[1]
    print 'Processing file:', file_name_in
@@ -59,12 +63,15 @@ for i, row in enumerate(f):
 # Just the time for benchmark
 print '%.3fs: loaded' % elapsed()
 
+# Load trump file proper for input file you use
+# It is needed to find maximum value of Np
+
 print 'Loading trump.txt...'
 tcol1,tcol2,tcol3,n_p_column=np.loadtxt('trump.txt',unpack=True)
 n_p=np.max(n_p_column)
 print 'Np= ',n_p
 
-# Puffin variables
+# Puffin variables - may need change
 e_ch=1.602e-19
 c=3.0e+8
 m=9.11e-31
@@ -72,12 +79,11 @@ Pi=3.1415
 k_u=628                   # Undulator wave number
 a_u=1                     # undulator parameter ? a_u=a_w
 e_0=8.854*10**(-12)       # vacuum permitivity
-p_tot=np.sqrt((m_PX[:]**2)+(m_PY[:]**2)+(m_PZ[:]**2))
 
-#print np.size(p_tot),p_tot
+# Start to calculate data needed for Puffin
+
+p_tot=np.sqrt((m_PX[:]**2)+(m_PY[:]**2)+(m_PZ[:]**2))
 gamma=(np.sqrt(1+(p_tot/(m*c))**2))
-#print 'P_tot/mc ',p_tot/(m*c)
-#print np.size(gamma),gamma
 
 omega_p=np.sqrt((e_ch*e_ch*n_p)/(e_0*m))
 gamma_0=np.mean(gamma)
@@ -101,9 +107,6 @@ x_bar=m_X[:]/(np.sqrt(Lg*Lc))
 y_bar=m_Y[:]/(np.sqrt(Lg*Lc))
 px_bar=m_PX[:]/(m*c*a_u)
 py_bar=m_PY[:]/(m*c*a_u)
-#sig_gamma_tot
-#sig_px_bar
-#sig_py_bar
 Ne=m_WGHT[:]/n_p          # weight
 
 
@@ -129,8 +132,10 @@ ParticleGroup._v_attrs.vsTimeGroup='time'
 ParticleGroup._v_attrs.vsNumSpatialDims = 3
 ParticleGroup._v_attrs.vsLimits='globalGridGlobalLimits'
 ParticleGroup._v_attrs.vsLabels='x_bar,y_bar,px_bar,py_bar,gamma,z2,Ne'
+
 #Close the file
 output_file.close()
+# Create Puffin ASCII input file
 out_txt=open(file_name_base+'_Puffin.txt','w')
 
 n=len(m_X)

@@ -4,17 +4,26 @@ Created on Tue Nov 17 14:52:33 2015
 
 @author: piotrt
 """
+# WARNING !!!!
+
+# This script is draft for converting Puffin data into Elegant
+# Elegant needs all particles to be of same charge while Puffin
+
+# The SDDSToolkit is essential !!
+
 import numpy as np
 import h5py
 import tables
 import os
 import sys
 
+# Some basic constants
 ERM=0.51099906 #Electron Rest Mass
 me=9.11e-31
 e_ch=1.602e-19
 c=3e+08
 
+# Read the name of the file - as input give the step number you want to use
 if len(sys.argv)==2:
    step_name_in=sys.argv[1]
    print 'Processing file:', step_name_in
@@ -22,7 +31,8 @@ else:
    print 'Usage: Puf2Ele <TimeStep Number e.g. 750> \n'
    sys.exit(1)  
 
-
+# Merge Puffin output into one array.
+# Find the name of the files
 print 'Merging Puffin output files...'
 step_no=str(step_name_in)
 xdatfile=step_no+'_XDataFile.dat'
@@ -38,11 +48,14 @@ outfile=step_no+'_all.sdds'
 final_output=step_no+'_all.sdds'
 
 
+# Call sddsxref to merge Puffin SDDS formatted output into one large file - takes a while...
+# Drink tea, coffee, yerba or whatever you like in case of large files.
 
 os.system("sddsxref %s %s %s %s %s %s %s %s"\
 %(xdatfile,ydatfile,z2datfile,RE_datfile,IM_datfile,Gamma_datfile,Chi_datfile,outfile))
-#os.system("sddscombine -overWrite %s %s %s"\
-#%(outfile,ParamDataFile,final_output))
+
+# Convert SDDS to HDF5 for easier use in Python
+# Python can't access SDDS files directly but can access HDF5 withe ease.
 
 print 'Converting SDDS Puffin output to HDF5...'
 
@@ -50,6 +63,8 @@ final_output_hdf=step_no+'_all.h5'
 os.system("sdds2hdf %s %s"\
 %(final_output,final_output_hdf))
 os.remove(final_output)
+
+# Load data from HDF5 into memory - beware of the size...
 
 print 'Loading data from Puffin HDF5...'
 
@@ -103,6 +118,8 @@ print 'Total charge= ',total_charge
 
 print 'Processing data...'
 
+# Start to convert coordinates into Elegant format.
+
 z=Lg_f[0]*z_bar
 
 S=(Lc_f[0]*Z2_f[:])+z
@@ -127,35 +144,40 @@ yp=Py/Pz
 m_t=z/(c*Beta_z)
 
 
+# Built array in Elegant format (x,xp,y,yp,t,p)
 
 full_array=np.column_stack((X,xp,Y,yp,m_t,P))
 
+# Open HDF5 output and SDDS output file, HDF5 is used just for plotting
+# 
 FinalHDF_File=step_no+'_full_array.h5'
 FinalSDDS_File=step_no+'_full_array.sdds'
 
 print 'Creating final HDF5 output...'
 output_file=tables.open_file(FinalHDF_File,'w')
-
+# Create group in HDF file and remove not necessary metadata.
 ParticleGroup=output_file.create_array('/','spatialPositions',full_array)
 del ParticleGroup._v_attrs.CLASS
 del ParticleGroup._v_attrs.VERSION
 del ParticleGroup._v_attrs.FLAVOR
 del ParticleGroup._v_attrs.TITLE
 output_file.close()
-
+# Convert HDF5 into SDDS
 os.system("hdf2sdds %s %s -dataset=spatialPositions"\
 %(FinalHDF_File,FinalSDDS_File))
 
 print 'Creating SDDS output...'
+# Name columns in SDDS file
 os.system("sddsconvert %s -rename=columns,D1=x,D2=xp,D3=y,D4=yp,D5=t,D6=p"\
 %(FinalSDDS_File))
+# Add total charge which is not true for Elegant... 
 os.system("sddsprocess %s -define=parameter,Charge,%s,units=C"\
 %(FinalSDDS_File,total_charge))
 
 os.remove(FinalSDDS_File+'~')
 
 
-
+# Add metadata to HDF5 file just to use it for plotting in ViSit
 print 'Adding some magic...'
 output_file=tables.open_file(FinalHDF_File,'a')
 ParticleGroup=output_file.root.spatialPositions

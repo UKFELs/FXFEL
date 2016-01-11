@@ -4,6 +4,9 @@ Created on Mon Sep  7 14:56:42 2015
 
 @author: piotrt
 """
+# The script converts VSim output into MASP input
+# It basically changes the units so, that MASP output will be ready for MASP2Puffin.
+
 # Import proper libraries: h5py and numpy, needed to handle HDF5
 import h5py
 import numpy as np
