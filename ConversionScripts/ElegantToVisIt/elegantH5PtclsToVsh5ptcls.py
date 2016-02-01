@@ -92,6 +92,9 @@ def writeSDDSptclsToVsH5(sddsH5Data, basename, particleName):
     varsGroup=vsh5.create_group('/','zmod','')
     varsGroup._v_attrs.vsType='vsVars'
     varsGroup._v_attrs.zmod='2.998e8*'+particleName+'_tmod'
+    varsGroup=vsh5.create_group('/','electrons_dtmod','')
+    varsGroup._v_attrs.vsType='vsVars'
+    varsGroup._v_attrs.zmod=particleName+'_dt-'++str(numpy.average(sddsH5Data.columns.dt.read()))
     if 's' in sddsH5Data.parameters._v_children.keys():
       elecGroup._v_attrs.time=sddsH5Data.parameters.s.read()
       timeGroup._v_attrs.vsTime=sddsH5Data.parameters.s.read()
