@@ -7,6 +7,8 @@ Created on Thu Oct  8 15:55:37 2015
 import numpy as np
 import tables
 import sys
+import csv
+import time
 import datetime
 now = datetime.datetime.now()
 print 'Conversion time: ',now.strftime("%Y-%m-%d %H:%M:%S")
@@ -28,29 +30,42 @@ file_name_base  = (file_name_in.split('.')[0]).strip()
 
 # Open and load file, then read as lines into array
 
+start = time.time()
+def elapsed():
+    return time.time() - start
 
-data=[]
-with open(file_name_in, 'r') as file_in:
-    for line in file_in:
-            p=line.split()
-            data.append(p)
-            data=[line.split() for line in file_in]
+# count data rows, to preallocate array
+# Change the file name - twice ! (the next is repeated in line 37, this is for debug reason)
+linecount = sum(1 for line in open(file_name_in))
 
+print '\n%.3fs: File has %s rows' % (elapsed(), linecount)
 
-# define array as float
-data2=np.array(data,dtype=np.float64)
-#data2=data2.astype(float)
-print(data2.shape)
+# pre-allocate array and load data into array
 
-# assign chosen rows from loaded array
-x=data2[:,0]
-y=data2[:,2]
-z=data2[:,4]
-px=data2[:,1]
-py=data2[:,3]
-pz=data2[:,5]
-NE=data2[:,6]
+x = np.zeros((linecount,1), dtype=np.float64)
+px = np.zeros((linecount,1), dtype=np.float64)
+y = np.zeros((linecount,1), dtype=np.float64)
+py = np.zeros((linecount,1), dtype=np.float64)
+z = np.zeros((linecount,1), dtype=np.float64)
+pz = np.zeros((linecount,1), dtype=np.float64)
+NE = np.zeros((linecount,1), dtype=np.float64)
 
+# Read the file line by line but each row goes to separate array (so you need to know structure it is not good)
+# The delimiter is important as MASP produces output with comma while other programs can use space - check before run
+# Check the filename - has to be same as the one used previously
+
+f = csv.reader(open(file_name_in, 'r'),delimiter=',')
+for i, row in enumerate(f):
+     x[i] = float(row[0]),
+     px[i] = float(row[1]),
+     y[i] = float(row[2]),
+     py[i] = float(row[3]),
+     z[i] = float(row[4]),
+     pz[i] = float(row[5]),
+     NE[i] = float(row[6]),
+
+# Just the time for benchmark
+print '%.3fs: loaded' % elapsed()
 
 
 x_px_y_py_z_pz_NE = np.vstack([x,px,y,py,z,pz,NE]).T
