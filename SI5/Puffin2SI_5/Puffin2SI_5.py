@@ -109,7 +109,7 @@ X=np.sqrt(Lg_f[0]*Lc_f[0])*X_f[:]
 Y=np.sqrt(Lg_f[0]*Lc_f[0])*Y_f[:]
 
 Gamma=Gamma_f[:]*gamma_0_f[0]
-P=me*c*((Gamma**2)-1)
+P=me*c*np.sqrt((Gamma**2)-1)
 
 
 Px=RE_PPerp_f[:]*me*c*a_u_f[0]

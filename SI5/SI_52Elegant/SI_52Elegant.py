@@ -27,7 +27,7 @@ print 'Loading data from SI HDF5...'
 
 f=tables.open_file(file_input_hdf,'r')
 #f=h5py.File(file_input_hdf,'r')
-Electrons=f.root.Electrons.read()
+Electrons=f.root.Particles.read()
 
 X=Electrons[:,0]
 Px=Electrons[:,1]
@@ -74,7 +74,8 @@ os.system("sddsconvert %s -rename=columns,D1=x,D2=xp,D3=y,D4=yp,D5=t,D6=p"\
 %(FinalSDDS_File))
 os.system("sddsprocess %s %s -define=parameter,Charge,%s,units=C"\
 %(FinalSDDS_File,FinalSDDS_File,TotalCharge))
-
+os.system("sddsprocess -convertunits=column,x,m,,1 -convertunits=column,y,m,,1 -convertunits=column,t,s,,1 %s "\
+%(FinalSDDS_File))
 os.remove(FinalSDDS_File+'~')
 os.remove(FinalHDF_File)
 print 'Created SDDS: ',FinalSDDS_File

@@ -16,7 +16,7 @@ if len(sys.argv)==2:
    file_name_in=sys.argv[1]
    print 'Processing file:', file_name_in
 else:
-   print 'Usage: MASP2Puf <FileName> \n'
+   print 'Usage: SI_52Puffin <FileName> \n'
    sys.exit(1)  
 file_name_base  = (file_name_in.split('.')[0]).strip()
 
@@ -61,7 +61,7 @@ e_ch=1.602e-19
 c=3.0e+8
 m=9.11e-31
 Pi=3.1415
-k_u=628                   # Undulator wave number
+k_u=251                   # Undulator wave number default=628
 a_u=1                     # undulator parameter ? a_u=a_w
 e_0=8.854*10**(-12)       # vacuum permitivity
 p_tot=np.sqrt((m_PX[:]**2)+(m_PY[:]**2)+(m_PZ[:]**2))
@@ -105,8 +105,8 @@ py_bar=m_PY[:]/(m*c*a_u)
 #sig_gamma_tot
 #sig_px_bar
 #sig_py_bar
-Ne=m_WGHT[:]          # weight
-
+#Ne=m_WGHT[:]/n_p          # weight charge
+Ne=m_WGHT[:]          # weight number of electrons
 
 # Combine all read arrays into one
 m=np.vstack((x_bar,y_bar,px_bar,py_bar,gamma/gamma_0,z2,Ne)).T

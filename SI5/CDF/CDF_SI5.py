@@ -99,7 +99,7 @@ print len(mB_X)
 # but at the end your particles will have smaller than one what means that 
 # you have less than one electron per particle
 # Currently there is no safety mechanism to avoid this
-DensityFactor=0.10
+DensityFactor=10.0
 print 'Total number of electrons: ',TotalNumberOfElectrons
 print 'Number of source particles: ',len(mB_X)
 print 'Electrons/macroparticles in source data:',round(TotalNumberOfElectrons/len(mB_X))
@@ -110,7 +110,7 @@ print 'Desired Electrons/macroparticles in output data:',int(round(TotalNumberOf
 # Otherwise your particles will be cut at the end
 # Very low number can give weird results
 
-NumberOfParticlesPerSlice=50
+NumberOfParticlesPerSlice=750
 TotalNumberOfSteps=len(mB_X)/NumberOfParticlesPerSlice
 #part_no_in_step=len(mB_X)/total_no_steps
 
@@ -130,7 +130,7 @@ for stepnumber in range(1,TotalNumberOfSteps):
 
 
    
-    binnumber=1000
+    binnumber=10
 
 
     Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber,normed=False,weights=m_WGHT.flat)
