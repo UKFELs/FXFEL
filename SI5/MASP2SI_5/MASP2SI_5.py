@@ -54,7 +54,7 @@ NE = np.zeros((linecount,1), dtype=np.float64)
 # The delimiter is important as MASP produces output with comma while other programs can use space - check before run
 # Check the filename - has to be same as the one used previously
 
-f = csv.reader(open(file_name_in, 'r'),delimiter=',')
+f = csv.reader(open(file_name_in, 'r'),delimiter=' ')
 for i, row in enumerate(f):
      x[i] = float(row[0]),
      px[i] = float(row[1]),
@@ -68,8 +68,8 @@ for i, row in enumerate(f):
 print '%.3fs: loaded' % elapsed()
 
 
-x_px_y_py_z_pz_NE = np.vstack([x,px,y,py,z,pz,NE]).T
-
+# x_px_y_py_z_pz_NE = np.vstack([x,px,y,py,z,pz,NE]).T
+x_px_y_py_z_pz_NE = np.hstack([x,px,y,py,z,pz,NE])
 
 
 
