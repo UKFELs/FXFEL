@@ -1,0 +1,309 @@
+SDDS1
+&parameter
+  name = nX
+  type = long
+&end
+&parameter
+  name = nY
+  type = long
+&end
+&parameter
+  name = nZ2
+  type = long
+&end
+&parameter
+  name = iNumElectronsX
+  type = long
+&end
+&parameter
+  name = iNumElectronsY
+  type = long
+&end
+&parameter
+  name = iNumElectronsZ2
+  type = long
+&end
+&parameter
+  name = iNumElectronsPX
+  type = long
+&end
+&parameter
+  name = iNumElectronsPY
+  type = long
+&end
+&parameter
+  name = iNumElectronsGam
+  type = long
+&end
+&parameter
+  name = sLengthOfElmX
+  type = double
+&end
+&parameter
+  name = sLengthOfElmY
+  type = double
+&end
+&parameter
+  name = sLengthOfElmZ2
+  type = double
+&end
+&parameter
+  name = sStepSize
+  type = double
+&end
+&parameter
+  name = nSteps
+  type = long
+&end
+&parameter
+  name = sLenEPulseX
+  type = double
+&end
+&parameter
+  name = sLenEPulseY
+  type = double
+&end
+&parameter
+  name = sLenEPulseZ2
+  type = double
+&end
+&parameter
+  name = sLenEPulsePX
+  type = double
+&end
+&parameter
+  name = sLenEPulsePY
+  type = double
+&end
+&parameter
+  name = sLenEPulseGam
+  type = double
+&end
+&parameter
+  name = sWigglerLengthX
+  type = double
+&end
+&parameter
+  name = sWigglerLengthY
+  type = double
+&end
+&parameter
+  name = sWigglerLengthZ2
+  type = double
+&end
+&parameter
+  name = sSigmaGaussianX
+  type = double
+&end
+&parameter
+  name = sSigmaGaussianY
+  type = double
+&end
+&parameter
+  name = sSigmaGaussianZ2
+  type = double
+&end
+&parameter
+  name = sSigmaGaussianPX
+  type = double
+&end
+&parameter
+  name = sSigmaGaussianPY
+  type = double
+&end
+&parameter
+  name = sSigmaGaussianGam
+  type = double
+&end
+&parameter
+  name = sA0_Re
+  type = double
+&end
+&parameter
+  name = sA0_Im
+  type = double
+&end
+&parameter
+  name = rho
+  type = double
+&end
+&parameter
+  name = aw
+  type = double
+&end
+&parameter
+  name = eta
+  type = double
+&end
+&parameter
+  name = gamma_r
+  type = double
+&end
+&parameter
+  name = k_beta
+  type = double
+&end
+&parameter
+  name = ff
+  type = double
+&end
+&parameter
+  name = lambda_w
+  type = double
+&end
+&parameter
+  name = lambda_r
+  type = double
+&end
+&parameter
+  name = Lg
+  type = double
+&end
+&parameter
+  name = Lc
+  type = double
+&end
+&parameter
+  name = npk_bar
+  type = double
+&end
+&parameter
+  name = totalNumberElectrons
+  type = long
+&end
+&parameter
+  name = nWaveEquations
+  type = long
+&end
+&parameter
+  name = nElectronEquations
+  type = long
+&end
+&parameter
+  name = sZ
+  type = double
+&end
+&parameter
+  name = iWriteNthSteps
+  type = long
+&end
+&parameter
+  name = iIntWriteNthSteps
+  type = long
+&end
+&parameter
+  name = sSeedSigmaX
+  type = double
+&end
+&parameter
+  name = sSeedSigmaY
+  type = double
+&end
+&parameter
+  name = sSeedSigmaZ2
+  type = double
+&end
+&parameter
+  name = qElectronsEvolve
+  type = long
+&end
+&parameter
+  name = qFieldEvolve
+  type = long
+&end
+&parameter
+  name = qDiffraction
+  type = long
+&end
+&parameter
+  name = qElectronFieldCoupling
+  type = long
+&end
+&parameter
+  name = qFocussing
+  type = long
+&end
+&parameter
+  name = qMatchedBeam
+  type = long
+&end
+&parameter
+  name = qOneD
+  type = long
+&end
+&parameter
+  name = fx
+  type = double
+&end
+&parameter
+  name = fy
+  type = double
+&end
+&parameter
+  name = kappa
+  type = double
+&end
+&data
+  mode = ascii
+&end
+       85
+       85
+     2351
+       20
+       20
+     1100
+        7
+        7
+        7
+ 0.10621888963243E+000
+ 0.10621888963243E+000
+ 0.13226059012954E-001
+ 0.83775806427002E-002
+     1800
+ 0.20181589030161E+001
+ 0.20181589030161E+001
+ 0.13034420205999E+002
+ 0.35682590655000E-002
+ 0.35682590655000E-002
+ 0.60000000000000E+000
+ 0.89223867291238E+001
+ 0.89223867291238E+001
+ 0.31081238680443E+002
+ 0.33635981716935E+000
+ 0.33635981716935E+000
+ 0.18833690044503E+022
+ 0.59470984425000E-003
+ 0.59470984425000E-003
+ 0.10000000000000E+000
+ 0.00000000000000E+000
+ 0.00000000000000E+000
+ 0.20000000000000E-001
+ 0.10000000000000E+001
+ 0.10001500250049E-003
+ 0.10000000000000E+003
+ 0.25000000000000E+000
+ 0.14121356010437E+001
+ 0.40000000000000E-001
+ 0.40006001000196E-005
+ 0.15915493866301E+000
+ 0.15917881588346E-004
+ 0.35966549432743E+010
+       1034713
+        2
+        6
+ 0.00000000000000E+000
+       60
+       30
+ 0.33635981716935E+000
+ 0.33635981716935E+000
+ 0.37667380089005E+014
+        1
+        1
+        1
+        1
+        1
+        0
+        0
+ 0.10000000000000E+001
+ 0.10000000000000E+001
+ 0.25000000000000E+000
