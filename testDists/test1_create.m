@@ -1,6 +1,6 @@
 clear all;
 
-N = 1000;
+N = 10000;
 
 
 h = 6.626e-34; % Planck constant
@@ -80,7 +80,7 @@ yd0 = randn(1,NMcenter)*sigmayd;
 E0 = (randn(1,NMcenter)*sigmag*gamma_r + gamma_r) * m_e ...
                         * c^2 / q_e;
 s0 = rand(1,NMcenter)*sigmat;
-figure; plot(s0,E0,'.');
+%figure; plot(s0,E0,'.');
 
 
 
@@ -94,7 +94,7 @@ se = randn(1,NMedge)*sigmaedge * Lc / c;
 
 se(se>0) = se(se>0) + sigmat;
 
-figure; plot(se,Ee,'.');
+%figure; plot(se,Ee,'.');
 
 
 x0 = [x0, xe];
@@ -105,12 +105,29 @@ E0 = [E0, Ee];
 s0 = [s0, se];
 
 figure; plot(s0,E0,'.');
+xlabel('time (s)');
+ylabel('Energy (eV)');
 
 
 %%%%%%%%%    Charge on each macroparticle is:
 
 
 QMP = 4.518997285641631E-009 / N
+Q0 = zeros(1,N);
+Q0(:) = QMP;
+
+%%% x0 is x coordinates in metres
+%%% y0 is x coordinates in metres
+%%% xd0 is dx/dz
+%%% yd0 is dy/dz
+%%% E0 is energy in eV
+%%% s0 is temporal coordinate in seconds
+%%% Q0 is charge in macroparticle in Coulombs
+
+
+dlmwrite('test.txt',[x0', y0', xd0', yd0', E0', s0', Q0'], 'delimiter',',');
+
+
 
 
 
