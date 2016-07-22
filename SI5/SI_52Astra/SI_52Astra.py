@@ -22,7 +22,7 @@ file_name_base  = (file_name_in.split('.')[0]).strip()
 
 
 f=tables.open_file(file_name_in,'r')
-Electrons=f.root.Electrons.read()
+Electrons=f.root.Particles.read()
 
 # Assign number of records (macroparticles) as n
 n=len(Electrons)
