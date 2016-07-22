@@ -85,7 +85,7 @@ output_file=tables.open_file(file_name_base+'.si5','w')
 
 
 # Save the array into hdf5 file
-ParticleGroup=output_file.create_array('/','Electrons',x_px_y_py_z_pz_NE)
+ParticleGroup=output_file.create_array('/','Particles',x_px_y_py_z_pz_NE)
 
 #Create metadata - currently for Visit to make scatter plots
 boundsGroup=output_file.create_group('/','globalGridGlobalLimits','')
