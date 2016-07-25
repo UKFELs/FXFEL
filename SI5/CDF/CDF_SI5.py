@@ -99,7 +99,7 @@ print len(mB_X)
 # but at the end your particles will have smaller than one what means that 
 # you have less than one electron per particle
 # Currently there is no safety mechanism to avoid this
-DensityFactor=10.0
+DensityFactor=1.0
 print 'Total number of electrons: ',TotalNumberOfElectrons
 print 'Number of source particles: ',len(mB_X)
 print 'Electrons/macroparticles in source data:',round(TotalNumberOfElectrons/len(mB_X))
@@ -110,7 +110,7 @@ print 'Desired Electrons/macroparticles in output data:',int(round(TotalNumberOf
 # Otherwise your particles will be cut at the end
 # Very low number can give weird results
 
-NumberOfParticlesPerSlice=750
+NumberOfParticlesPerSlice=50
 TotalNumberOfSteps=len(mB_X)/NumberOfParticlesPerSlice
 #part_no_in_step=len(mB_X)/total_no_steps
 
@@ -197,7 +197,7 @@ for stepnumber in range(1,TotalNumberOfSteps):
     ff_Y = interp1d(cumulative_nq_Y, xx_0_Y)
     ff_X = interp1d(cumulative_nq_X, xx_0_X)
 
-    Num_Of_Target_Particles=NumParticlesInSlice*DensityFactor
+    Num_Of_Target_Particles=int(NumParticlesInSlice*DensityFactor)
  
     density_Z=np.linspace(min(cumulative_nq_Z),max(cumulative_nq_Z),Num_Of_Target_Particles)
     density_Y=np.random.uniform(low=min(cumulative_nq_Y), high=max(cumulative_nq_Y), size=(Num_Of_Target_Particles))
