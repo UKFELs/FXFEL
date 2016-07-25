@@ -5,7 +5,6 @@ Created on Tue Nov 17 14:52:33 2015
 @author: piotrt
 """
 import numpy as np
-import h5py
 import tables
 import os
 import sys
@@ -57,27 +56,28 @@ os.remove(final_output)
 
 print 'Loading data from Puffin HDF5...'
 
-f=h5py.File(final_output_hdf,'r')
+#f=h5py.File(final_output_hdf,'r')
+f=tables.open_file(final_output_hdf,'r')
 
-X_f=np.array(f['/page1/columns/X'])
-Y_f=np.array(f['/page1/columns/Y'])
-Z2_f=np.array(f['/page1/columns/Z2'])
+X_f=f.root.page1.columns.X.read()
+Y_f=f.root.page1.columns.Y.read()
+Z2_f=f.root.page1.columns.Z2.read()
 
-Gamma_f=np.array(f['/page1/columns/Gamma'])
-IM_PPerp_f=np.array(f['/page1/columns/IM_PPerp'])
-RE_PPerp_f=np.array(f['/page1/columns/RE_PPerp'])
-s_chi_bar_f=np.array(f['/page1/columns/s_chi_bar'])
+Gamma_f=f.root.page1.columns.Gamma.read()
+IM_PPerp_f=f.root.page1.columns.IM_PPerp.read()
+RE_PPerp_f=f.root.page1.columns.RE_PPerp.read()
+s_chi_bar_f=f.root.page1.columns.s_chi_bar.read()
 f.close()
 os.remove(final_output_hdf)
 
 os.system("sdds2hdf ParamDataFile.dat param.h5")
 
-f2=h5py.File('param.h5','r')
-Lc_f=np.array(f2['/page1/parameters/Lc'])
-Lg_f=np.array(f2['/page1/parameters/Lg'])
-a_u_f=np.array(f2['/page1/parameters/aw'])
-gamma_0_f=np.array(f2['/page1/parameters/gamma_r'])
-npk_bar=np.array(f2['/page1/parameters/npk_bar'])
+f2=tables.open_file('param.h5','r')
+Lc_f=f2.root.page1.parameters.Lc.read()
+Lg_f=f2.root.page1.parameters.Lg.read()
+a_u_f=f2.root.page1.parameters.aw.read()
+gamma_0_f=f2.root.page1.parameters.gamma_r.read()
+npk_bar=f2.root.page1.parameters.npk_bar.read()
 f2.close()
 os.remove('param.h5')
 
@@ -90,8 +90,8 @@ print 'gamma_r = ',gamma_0_f[0]
 
 os.system("sdds2hdf %s Z.h5"\
 %(ZDataFile))
-z_file=h5py.File('Z.h5','r')
-z_param_f=np.array(z_file['/page1/columns/Z'])
+z_file=tables.open_file('Z.h5','r')
+z_param_f=z_file.root.page1.columns.Z.read()
 z_file.close()
 os.remove('Z.h5')
 
