@@ -27,8 +27,19 @@ else:
    print 'Usage: Fields2SI_5 <TimeStep Number e.g. 750> \n'
    sys.exit(1)  
 step_no=str(step_name_in)
+
+
+IM_SDDS=step_no+'_IM_ADataFile.dat'
+RE_SDDS=step_no+'_RE_ADataFile.dat'
+
 final_output_hdf_IM=step_no+'_IM_ADataFile.h5'
 final_output_hdf_RE=step_no+'_RE_ADataFile.h5'
+
+os.system("sdds2hdf %s %s"\
+%(IM_SDDS,final_output_hdf_IM))
+os.system("sdds2hdf %s %s"\
+%(RE_SDDS,final_output_hdf_RE))
+
 
 
 
@@ -42,7 +53,6 @@ ydatfile=step_no+'_YDataFile.dat'
 z2datfile=step_no+'_Z2DataFile.dat'
 outfile=step_no+'_all.sdds'
 
-final_output=step_no+'_all.sdds'
 os.system("sddsxref %s %s %s %s"\
 %(xdatfile,ydatfile,z2datfile,outfile))
 #os.system("sddscombine -overWrite %s %s %s"\
@@ -52,8 +62,9 @@ print 'Converting SDDS Puffin output to HDF5...'
 
 final_output_hdf=step_no+'_POS.h5'
 os.system("sdds2hdf %s %s"\
-%(final_output,final_output_hdf))
-os.remove(final_output)
+%(outfile,final_output_hdf))
+
+
 
 f=tables.open_file(final_output_hdf,'r')
 X_f=f.root.page1.columns.X.read()
