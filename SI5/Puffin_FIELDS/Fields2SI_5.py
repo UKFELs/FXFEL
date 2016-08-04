@@ -30,6 +30,38 @@ step_no=str(step_name_in)
 final_output_hdf_IM=step_no+'_IM_ADataFile.h5'
 final_output_hdf_RE=step_no+'_RE_ADataFile.h5'
 
+
+
+
+
+
+print 'Merging Puffin output files...'
+step_no=str(step_name_in)
+xdatfile=step_no+'_XDataFile.dat'
+ydatfile=step_no+'_YDataFile.dat'
+z2datfile=step_no+'_Z2DataFile.dat'
+outfile=step_no+'_all.sdds'
+
+final_output=step_no+'_all.sdds'
+os.system("sddsxref %s %s %s %s"\
+%(xdatfile,ydatfile,z2datfile,outfile))
+#os.system("sddscombine -overWrite %s %s %s"\
+#%(outfile,ParamDataFile,final_output))
+
+print 'Converting SDDS Puffin output to HDF5...'
+
+final_output_hdf=step_no+'_POS.h5'
+os.system("sdds2hdf %s %s"\
+%(final_output,final_output_hdf))
+os.remove(final_output)
+
+f=tables.open_file(final_output_hdf,'r')
+X_f=f.root.page1.columns.X.read()
+Y_f=f.root.page1.columns.Y.read()
+Z2_f=f.root.page1.columns.Z2.read()
+
+
+
 print 'Loading data from Puffin HDF5...'
 
 #f=h5py.File(final_output_hdf,'r')
@@ -45,11 +77,20 @@ nX=f2.root.page1.parameters.nX.read()
 nY=f2.root.page1.parameters.nY.read()
 nZ2=f2.root.page1.parameters.nZ2.read()
 
+Lc_f=f2.root.page1.parameters.Lc.read()
+Lg_f=f2.root.page1.parameters.Lg.read()
 
 print 'Read constants...:'
 print 'nX = ',nX[0]
 print 'nY = ',nY[0]
 print 'nZ2 = ',nZ2[0]
+
+Z=Lc_f[0]*Z2_f
+
+
+X=np.sqrt(Lg_f[0]*Lc_f[0])*X_f[:]
+Y=np.sqrt(Lg_f[0]*Lc_f[0])*Y_f[:]
+
 
 
 IM_A_RSHP=np.reshape(IM_A,(nX[0],nY[0],nZ2[0]))
@@ -76,8 +117,8 @@ FieldGroup=output_file.create_array('/','Fields',FULL_FIELD)
 boundsGroup=output_file.create_group('/','globalLimits','')
 boundsGroup._v_attrs.vsKind='Cartesian'
 
-mins=np.array([-0.0005,-0.000407,0.000013])
-maxs=np.array([0.000505,0.000385,0.000020])
+mins=np.array([min(X),min(Y),min(Z)])
+maxs=np.array([max(X),max(Y),max(Z)])
 
 #boundsGroup._v_attrs.vsLowerBounds=np.array([np.min(FULL_FIELD[1,:,:]),np.min(FULL_FIELD[:,1,:]),np.min(FULL_FIELD[:,:,1])])
 boundsGroup._v_attrs.vsLowerBounds=mins
