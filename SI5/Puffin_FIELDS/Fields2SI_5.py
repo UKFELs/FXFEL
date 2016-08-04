@@ -104,8 +104,8 @@ Y=np.sqrt(Lg_f[0]*Lc_f[0])*Y_f[:]
 
 
 
-IM_A_RSHP=np.reshape(IM_A,(nX[0],nY[0],nZ2[0]))
-RE_A_RSHP=np.reshape(RE_A,(nX[0],nY[0],nZ2[0]))
+IM_A_RSHP=np.reshape(IM_A,(nX[0],nY[0],nZ2[0]),order='F')
+RE_A_RSHP=np.reshape(RE_A,(nX[0],nY[0],nZ2[0]),order='F')
 
 
 
@@ -114,7 +114,7 @@ print 'Processing data...'
 
 #full_array=np.vstack((X,Px,Y,Py,Z,Pz,NE)).T
 
-FinalHDF_File=step_no+'_Fields.si5'
+FinalHDF_File=step_no+'_Fields.h5'
 
 print 'Creating final HDF5 output...'
 output_file=tables.open_file(FinalHDF_File,'w')
