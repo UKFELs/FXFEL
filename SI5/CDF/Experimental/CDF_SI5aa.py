@@ -23,7 +23,7 @@ Created on Fri Apr  8 15:07:49 2016
 # electrons per macroparticles is equalized - so the total sum of electrons is same as at the beginnig
 # just divided over larger number of macroparticles.
 # The output file is saved as HDF5 file with VizSchema metadata added.
-
+import matplotlib.pyplot as plt
 
 import numpy as np
 import tables
@@ -109,7 +109,7 @@ print len(mB_X)
 # but at the end your particles will have smaller than one what means that 
 # you have less than one electron per particle
 # Currently there is no safety mechanism to avoid this
-DensityFactor=1.E4
+DensityFactor=10.0
 print 'Total number of electrons: ',TotalNumberOfElectrons
 print 'Number of source particles: ',len(mB_X)
 print 'Electrons/macroparticles in source data:',round(TotalNumberOfElectrons/len(mB_X))
@@ -120,8 +120,8 @@ print 'Desired Electrons/macroparticles in output data:',int(round(TotalNumberOf
 # Otherwise your particles will be cut at the end
 # Very low number can give weird results
 
-NumberOfParticlesPerSlice=50
-TotalNumberOfSteps=len(mB_X)/NumberOfParticlesPerSlice
+NumberOfParticlesPerSlice=100
+TotalNumberOfSteps=1+(len(mB_X)/NumberOfParticlesPerSlice)
 #part_no_in_step=len(mB_X)/total_no_steps
 
 print 'Total number of steps= ',TotalNumberOfSteps
@@ -160,6 +160,15 @@ for stepnumber in range(1,TotalNumberOfSteps):
 
     from scipy.interpolate import interp1d
     f_Z = interp1d(x0_Z, y0_Z)
+    
+    
+    #z_axis_length=max(x0_Z)-min(x0_Z)
+
+    #t_knots_z=[min(x0_Z)+0.1*z_axis_length,min(x0_Z)+0.25*z_axis_length,np.mean(x0_Z),max(x0_Z)-0.25*z_axis_length,max(x0_Z)-0.1*z_axis_length]
+    #print 'Knots values for LSQ Spline = ',t_knots_z
+    #t_knots=[(min(x0_Z)+np.mean(x0_Z))/2,np.mean(x0_Z),(max(x0_Z)+np.mean(x0_Z))/2]
+    #print t_knots
+    #f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z)
     f_Y = interp1d(x0_Y, y0_Y)
     f_X = interp1d(x0_X, y0_X)
 
@@ -212,15 +221,30 @@ print 'X Cumulative length = ',len(cumulative_nq_X_FL)
 xx_0_Z=np.linspace(np.min(mB_Z),np.max(mB_Z),len(cumulative_nq_Z_FL))
 xx_0_Y=np.linspace(np.min(mB_Y),np.max(mB_Y),len(cumulative_nq_Y_FL))
 xx_0_X=np.linspace(np.min(mB_X),np.max(mB_X),len(cumulative_nq_X_FL))  
+
+
+cdf_axis_length=max(cumulative_nq_Z_FL)-min(cumulative_nq_Z_FL)
+
+tt_knots_z=[min(cumulative_nq_Z_FL)+0.1*cdf_axis_length,min(cumulative_nq_Z_FL)+0.25*cdf_axis_length,np.mean(cumulative_nq_Z_FL),max(cumulative_nq_Z_FL)-0.25*cdf_axis_length,max(cumulative_nq_Z_FL)-0.1*cdf_axis_length]
+#tt_knots_z=[min(cumulative_nq_Z_FL)+0.1*cdf_axis_length,np.mean(cumulative_nq_Z_FL),max(cumulative_nq_Z_FL)-0.1*cdf_axis_length]
+print 'Knots values for LSQ Spline in CDF = ',tt_knots_z
+
+ff_Z = interpolate.LSQUnivariateSpline(cumulative_nq_Z_FL, xx_0_Z,tt_knots_z)
     
-ff_Z = InterpolatedUnivariateSpline(cumulative_nq_Z_FL, xx_0_Z)
+#ff_Z = interpolate.UnivariateSpline(cumulative_nq_Z_FL, xx_0_Z)
 ff_Y = InterpolatedUnivariateSpline(cumulative_nq_Y_FL, xx_0_Y)
 ff_X = InterpolatedUnivariateSpline(cumulative_nq_X_FL, xx_0_X)
 
+plt.title('Cumulative density function')
+plt.xlabel('Z')
+plt.ylabel('CDF')
+plt.grid(True)
+plt.plot(xx_0_Z, cumulative_nq_Z_FL, label='CDF')
+plt.show()
 
  
-density_Z=np.linspace(min(cumulative_nq_Z_FL),max(cumulative_nq_Z_FL),Num_Of_Target_Particles)
-#density_Z=np.random.uniform(low=min(cumulative_nq_Z_FL), high=max(cumulative_nq_Z_FL), size=(Num_Of_Target_Particles))
+#density_Z=np.linspace(min(cumulative_nq_Z_FL),max(cumulative_nq_Z_FL),Num_Of_Target_Particles)
+density_Z=np.random.uniform(low=min(cumulative_nq_Z_FL), high=max(cumulative_nq_Z_FL), size=(Num_Of_Target_Particles))
 density_Y=np.random.uniform(low=min(cumulative_nq_Y_FL), high=max(cumulative_nq_Y_FL), size=(Num_Of_Target_Particles))
 density_X=np.random.uniform(low=min(cumulative_nq_X_FL), high=max(cumulative_nq_X_FL), size=(Num_Of_Target_Particles))
 
@@ -251,6 +275,17 @@ x_px_y_py_z_pz_NE = np.vstack([Full_X.flat,Full_PX.flat,Full_Y.flat,Full_PY.flat
 
 #x_px_y_py_z_pz_NE = np.vstack([Full_X.flat,Full_Y.flat,Full_Z.flat,No_Particles_Per_Record.flat]).T
 
+
+
+plt.title('Density profiles')
+plt.xlabel('Z')
+plt.ylabel('Density')
+plt.hist(Full_Z,weights=No_Particles_Per_Record,bins=100)
+#plt.plot(x0_Z,y0_Z,'yo')
+plt.ticklabel_format(style='sci')
+plt.grid(True)
+#plt.plot(xnew_Z_plt,ynew_Z_plt,linewidth=4, color='red')
+plt.show()
 
 output_file=tables.open_file(file_name_base+'_TST.si5','w')
 
