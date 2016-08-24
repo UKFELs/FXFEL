@@ -224,8 +224,8 @@ for zz in range(1,len(edges_YZ[1])):
 
 
 # Generate random initial slice of X/Y particles set for CDF function - full range (0-1)
-
-SlicesMultiplyFactor=100
+# Slices multiply factor is the number how many layers should be within one Lc distance
+SlicesMultiplyFactor=4
 NumberOfSlices=int((size_z/Lc)*SlicesMultiplyFactor)
 Num_Of_Target_Particles=int(NumberOfSourceParticles*DensityFactor/NumberOfSlices)
 
@@ -307,11 +307,16 @@ for slice_number in range(0,NumberOfSlices):
     
     
 print np.shape(Full_X),np.shape(Full_Y),np.shape(Full_Z),np.shape(Full_Ne)    
-    
-output_file=tables.open_file(file_name_base+'_KDE.si5','w')
+ 
+Full_PX = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PX.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
+Full_PY = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PY.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
+Full_PZ = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PZ.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
 
-X_Y_Z_DensXZ_DensYZ = np.vstack([Full_X,Full_Y,Full_Z,Full_Ne]).T
-ParticleGroup=output_file.create_array('/','Particles',X_Y_Z_DensXZ_DensYZ)
+   
+output_file=tables.open_file(file_name_base+'_NS.si5','w')
+
+x_px_y_py_z_pz_NE = np.vstack([Full_X.flat,Full_PX.flat,Full_Y.flat,Full_PY.flat,Full_Z.flat,Full_PZ.flat,Full_Ne.flat]).T
+ParticleGroup=output_file.create_array('/','Particles',x_px_y_py_z_pz_NE)
 
 #Create metadata - currently for Visit to make scatter plots
 boundsGroup=output_file.create_group('/','globalGridGlobalLimits','')
@@ -323,7 +328,7 @@ ParticleGroup._v_attrs.vsType='variableWithMesh'
 ParticleGroup._v_attrs.vsTimeGroup='time'
 ParticleGroup._v_attrs.vsNumSpatialDims = 3
 ParticleGroup._v_attrs.vsLimits='globalGridGlobalLimits'
-ParticleGroup._v_attrs.vsLabels='x,y,z,Ne'
+ParticleGroup._v_attrs.vsLabels='x,px,y,py,z,pz,NE'
 ParticleGroup._v_attrs.FXFELConversionTime=now.strftime("%Y-%m-%d %H:%M:%S")
 ParticleGroup._v_attrs.FXFELSourceFileName=file_name_in
 ParticleGroup._v_attrs.FXFELDensityFactor=DensityFactor
