@@ -212,7 +212,7 @@ z_hstgrm_length=0.5*(edges_Z[0][binnumber_Z]+edges_Z[0][binnumber_Z-1])-0.5*(edg
 #t_knots_z=[min(x0_Z)+0.1*z_hstgrm_length,min(x0_Z)+0.25*z_hstgrm_length,np.mean(x0_Z),max(x0_Z)-0.25*z_hstgrm_length,max(x0_Z)-0.1*z_hstgrm_length]
 t_knots_z=[edges_Z[0][0]+0.1*z_hstgrm_length,edges_Z[0][0]+0.25*z_hstgrm_length,(edges_Z[0][binnumber_Z]+edges_Z[0][0])*0.5,edges_Z[0][binnumber_Z]-0.25*z_hstgrm_length,edges_Z[0][binnumber_Z]-0.1*z_hstgrm_length]
 #t_knots_z=[edges_Z[0][0]+0.25*z_hstgrm_length,edges_Z[0][binnumber_Z]-0.25*z_hstgrm_length]
-f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z,ext=3)
+f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z)
 
 
 
@@ -239,7 +239,7 @@ print np.shape(XZarr),np.shape(YZarr)
 # Generate random initial slice of X/Y particles set for CDF function - full range (0-1)
 # Slices multiply factor is the number how many layers should be within one Lc distance
 SlicesMultiplyFactor=10
-number_of_bins
+
 NumberOfSlices=(number_of_bins+1)*SlicesMultiplyFactor
 Num_Of_Slice_Particles=int(NumberOfSourceParticles*DensityFactor/NumberOfSlices)
 
@@ -309,17 +309,17 @@ for slice_number in range(0,NumberOfSlices):
         
         Slice_Ne=np.zeros(Num_Of_Slice_Particles)
         
-        Full_X=np.append(ff_XZ(density_X),Full_X)
-        Full_Y=np.append(ff_YZ(density_Y),Full_Y)
-        Full_Z=np.append(density_Z,Full_Z) 
+        
    # Charge in slice
         slice_counter=slice_counter+1
         Slice_Ne[:]=(f_Z(slice_counter*Step_Size+np.min(m_Z)))/SlicesMultiplyFactor        
+        if (np.sum(Slice_Ne))>=0:        
         #Slice_Ne[:]=(f_Z(slice_number*Step_Size+np.min(m_Z)))/SlicesMultiplyFactor
-        
-        Full_Ne=np.append(Slice_Ne/len(Slice_Ne),Full_Ne)
-
-    
+#           Slice_Ne[:]=1.0
+            Full_X=np.append(ff_XZ(density_X),Full_X)
+            Full_Y=np.append(ff_YZ(density_Y),Full_Y)
+            Full_Z=np.append(density_Z,Full_Z)        
+            Full_Ne=np.append(Slice_Ne/len(Slice_Ne),Full_Ne)
     
 print ' \r'    
 print np.shape(Full_X),np.shape(Full_Y),np.shape(Full_Z),np.shape(Full_Ne)    
@@ -328,9 +328,9 @@ Full_PX = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PX.
 Full_PY = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PY.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
 Full_PZ = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PZ.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
 
-Rand_Z=np.random.random((len(Full_Z))) - 0.5
+Rand_Z=Step_Size*(np.random.random(len(Full_Z)) - 0.5)
 print Rand_Z
-Full_Z=Full_Z+((Rand_Z*Step_Size)/np.sqrt(Full_Ne))
+Full_Z=Full_Z+(Rand_Z/np.sqrt(Full_Ne))
 
  
 output_file=tables.open_file(file_name_base+'_NS.si5','w')
