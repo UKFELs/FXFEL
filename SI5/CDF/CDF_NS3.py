@@ -77,7 +77,7 @@ mA_WGHT = Particles[:,6]
 
 Pi=3.1415
 k_u=157.075
-a_u=1
+a_u=2
 c=3.0e+8
 m=9.11e-31
 e_0=8.854E-12 
@@ -111,8 +111,33 @@ Lc=lambda_r/(4*Pi*rho)
 
 number_of_bins=int((size_z/Lc)*1.10)
 print 'Lc = ',Lc
+
+# If you want to set bin number to correlate with Lc (as above calculation) comment next line !!
+number_of_bins=150
 print 'Number of bins = ',number_of_bins
-number_of_bins=100
+
+# The below line sets factor of slices density per Lc
+SlicesMultiplyFactor=10
+
+# Set the multiplier of desired particle number
+# The highher the number the more time it will take
+# Please not that if you set this too high the algorithm will still work
+# but at the end your particles will have smaller than one what means that 
+# you have less than one electron per particle
+# Currently there is no safety mechanism to avoid this
+DensityFactor=1000
+
+NumberOfSourceParticles=len(mA_X)
+
+print 'Macroparticles in job= ',NumberOfSourceParticles
+
+NumberOfSlices=(int((size_z/Lc)*1.10)+1)*SlicesMultiplyFactor
+Num_Of_Slice_Particles=int(NumberOfSourceParticles*DensityFactor/NumberOfSlices)
+print 'Number of slices = ',NumberOfSlices
+
+
+
+
 # End of bin size calculations
 #*************************************************************
 
@@ -134,13 +159,7 @@ mB_Z=xyzW[:,2].flat
 mB_WGHT=xyzW[:,3].flat
 
 
-# Set the multiplier of desired particle number
-# The highher the number the more time it will take
-# Please not that if you set this too high the algorithm will still work
-# but at the end your particles will have smaller than one what means that 
-# you have less than one electron per particle
-# Currently there is no safety mechanism to avoid this
-DensityFactor=10
+
 print 'Initial charge of particles = ',TotalNumberOfElectrons*e_ch
 print 'Total number of electrons: ',TotalNumberOfElectrons
 print 'Number of source macroparticles: ',len(mB_X)
@@ -152,10 +171,7 @@ print 'Desired Electrons/macroparticles in output data:',int(round(TotalNumberOf
 # Otherwise your particles will be cut at the end
 # Very low number can give weird results
 
-NumberOfSourceParticles=len(mB_X)
 
-
-print 'Macroparticles in job= ',NumberOfSourceParticles
 
 
 
@@ -238,10 +254,10 @@ print np.shape(XZarr),np.shape(YZarr)
 
 # Generate random initial slice of X/Y particles set for CDF function - full range (0-1)
 # Slices multiply factor is the number how many layers should be within one Lc distance
-SlicesMultiplyFactor=10
 
-NumberOfSlices=(number_of_bins+1)*SlicesMultiplyFactor
-Num_Of_Slice_Particles=int(NumberOfSourceParticles*DensityFactor/NumberOfSlices)
+
+#NumberOfSlices=(number_of_bins+1)*SlicesMultiplyFactor
+#int((size_z/Lc)*1.10)
 
 
 Step_Size=(np.max(m_Z)-np.min(m_Z))/NumberOfSlices
