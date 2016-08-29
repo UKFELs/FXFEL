@@ -241,8 +241,20 @@ print np.shape(XZarr),np.shape(YZarr)
 # Slices multiply factor is the number how many layers should be within one Lc distance
 SlicesMultiplyFactor=10
 
-NumberOfSlices=(number_of_bins+1)*SlicesMultiplyFactor
+
+
+###### NEW FROM LAWRENCE
+
+#NumberOfSlices=(number_of_bins+1)*SlicesMultiplyFactor
+NumberOfSlices = int(round(size_z / (lambda_r / 20)))
+SlicesMultiplyFactor = NumberOfSlices / (number_of_bins+1)
+
 Num_Of_Slice_Particles=int(NumberOfSourceParticles*DensityFactor/NumberOfSlices)
+
+Num_Of_Slice_Particles=1000
+
+###### END OF NEW FROM LAWRENCE
+
 
 
 Step_Size=(np.max(m_Z)-np.min(m_Z))/NumberOfSlices
