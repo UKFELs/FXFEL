@@ -110,7 +110,7 @@ Lc=lambda_r/(4*Pi*rho)
 
 
 number_of_bins=int((size_z/Lc)*1.10)
-number_of_bins=40
+number_of_bins=20
 print 'Lc = ',Lc
 print 'Number of bins = ',number_of_bins
 
@@ -174,8 +174,11 @@ binnumber_Z=number_of_bins
 #binnumber_Z=100
 
 # Rescale X/Y bin number to 1/10 of the Z bin number - this allows more smoother data in case of sparse particle mesh
-binnumber_X=int(number_of_bins/10)
-binnumber_Y=int(number_of_bins/10)
+# binnumber_X=int(number_of_bins/10)
+# binnumber_Y=int(number_of_bins/10)
+
+binnumber_X=10  # Lawrence changed this part
+binnumber_Y=10  # Lawrence changed this part
 
 print'Binnumber X,Y,Z = ',binnumber_X,binnumber_Y,binnumber_Z
 Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber_Z,normed=False,weights=m_WGHT.flat)
@@ -213,15 +216,15 @@ z_hstgrm_length=0.5*(edges_Z[0][binnumber_Z]+edges_Z[0][binnumber_Z-1])-0.5*(edg
 #t_knots_z=[min(x0_Z)+0.1*z_hstgrm_length,min(x0_Z)+0.25*z_hstgrm_length,np.mean(x0_Z),max(x0_Z)-0.25*z_hstgrm_length,max(x0_Z)-0.1*z_hstgrm_length]
 t_knots_z=[edges_Z[0][0]+0.1*z_hstgrm_length,edges_Z[0][0]+0.25*z_hstgrm_length,(edges_Z[0][binnumber_Z]+edges_Z[0][0])*0.5,edges_Z[0][binnumber_Z]-0.25*z_hstgrm_length,edges_Z[0][binnumber_Z]-0.1*z_hstgrm_length]
 #t_knots_z=[edges_Z[0][0]+0.25*z_hstgrm_length,edges_Z[0][binnumber_Z]-0.25*z_hstgrm_length]
-f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z)
+f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z,ext=0)
 
 
 
 #f_Z = interpolate.UnivariateSpline(x0_Z, y0_Z,k=5)
 #print 0.5*(edges_Z[0][binnumber_Z]+edges_Z[0][binnumber_Z-1]),0.5*(edges_Z[0][0]+edges_Z[0][1])
 #print np.min(m_Z),np.max(mA_Z)
-#plt.plot(x0_Z,f_Z(x0_Z))
-#plt.show()
+plt.plot(x0_Z,f_Z(x0_Z))
+plt.show()
 # Convert XZ/YZ density histograms to XZ_Density/YZ_Density arrays
 for zz in range(1,len(edges_XZ[1])):
   for xx in range(1,len(edges_XZ[0])):
