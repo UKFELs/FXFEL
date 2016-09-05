@@ -63,7 +63,7 @@ m=9.11e-31
 Pi=3.1415
 k_u=251                   # Undulator wave number default=628
 a_u=1                     # undulator parameter ? a_u=a_w
-e_0=8.854*10**(-12)       # vacuum permitivity
+e_0=8.854E-12              # vacuum permitivity
 p_tot=np.sqrt((m_PX[:]**2)+(m_PY[:]**2)+(m_PZ[:]**2))
 
 #print np.size(p_tot),p_tot
