@@ -109,19 +109,19 @@ lambda_r=(lambda_u/(2*gamma_0**2))*(1+a_u**2)
 Lc=lambda_r/(4*Pi*rho)
 number_of_bins=int((size_z/Lc)*1.10)
 print 'Lc = ',Lc
-number_of_bins=100
+number_of_bins=20
 print 'Number of bins = ',number_of_bins
 
 binnumber_Z=number_of_bins   
-binnumber_X=20
-binnumber_Y=20
+binnumber_X=10
+binnumber_Y=10
 
 
 
 # End of bin size calculations
 #*************************************************************
-DensityFactor=100
-SlicesMultiplyFactor=30
+DensityFactor=500
+SlicesMultiplyFactor=5
 
 
 
@@ -199,11 +199,11 @@ YZarr=np.zeros(((len(edges_YZ[0])-1)*(len(edges_YZ[1])-1),3))
 # Interpolate density along Z-axis
 x0_Z = np.linspace(0.5*(edges_Z[0][0]+edges_Z[0][1]),0.5*(edges_Z[0][binnumber_Z]+edges_Z[0][binnumber_Z-1]),binnumber_Z)
 y0_Z = Hz
-z_hst_lngth=np.max(x0_Z)-np.min(x0_Z)
+#z_hst_lngth=np.max(x0_Z)-np.min(x0_Z)
 
-t_knots_z=np.linspace(np.min(x0_Z)+0.2*z_hst_lngth,np.max(x0_Z)-0.2*z_hst_lngth,6)
-f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z)
-
+#t_knots_z=np.linspace(np.min(x0_Z)+0.2*z_hst_lngth,np.max(x0_Z)-0.2*z_hst_lngth,6)
+#f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z)
+f_Z = interpolate.Rbf(x0_Z, y0_Z)
 plt.plot(m_Z,f_Z(m_Z))
 plt.show()
 
@@ -225,10 +225,12 @@ for zz in range(1,len(edges_YZ[1])):
 # Slices multiply factor is the number how many layers should be within one Lc distance
 
 
-NumberOfSlices=(number_of_bins+1)*SlicesMultiplyFactor
+
+NumberOfSlices=int(SlicesMultiplyFactor*(np.max(m_Z)-np.min(m_Z))/(4*Pi*rho*Lc))
 Num_Of_Slice_Particles=int(NumberOfSourceParticles*DensityFactor/NumberOfSlices)
 
-
+print 'Number of particles in each slice = ',Num_Of_Slice_Particles
+print 'Number of slices = ',NumberOfSlices
 
 
 Step_Size=(np.max(m_Z)-np.min(m_Z))/NumberOfSlices
@@ -247,15 +249,17 @@ Full_Ne=np.zeros(0)
 # Initiate empty array for Z positions or particles
 density_Z=np.zeros(Num_Of_Slice_Particles)
 
-f_Dens_XZ=interpolate.interp2d(XZarr[:,0].ravel(), XZarr[:,1].ravel(),XZarr[:,2].ravel(),kind='cubic',fill_value=0)
-f_Dens_YZ=interpolate.interp2d(YZarr[:,0].ravel(), YZarr[:,1].ravel(),YZarr[:,2].ravel(),kind='cubic',fill_value=0)
+f_Dens_XZ=interpolate.interp2d(XZarr[:,0].ravel(), XZarr[:,1].ravel(),XZarr[:,2].ravel(),kind='cubic')
+f_Dens_YZ=interpolate.interp2d(YZarr[:,0].ravel(), YZarr[:,1].ravel(),YZarr[:,2].ravel(),kind='cubic')
 
 
+# Plot the density profile XZ
 PLT_X=np.linspace(np.min(m_X),np.max(m_X),100)
 PLT_Z=np.linspace(np.min(m_Z),np.max(m_Z),100)
 import matplotlib.pyplot as plt
 plt.pcolormesh(PLT_X, PLT_Z,f_Dens_XZ(PLT_X, PLT_Z))
 plt.show()
+# End of plot
 
 
 for slice_number in range(0,NumberOfSlices):
@@ -277,44 +281,37 @@ for slice_number in range(0,NumberOfSlices):
 
     Dens_XZ=f_Dens_XZ(New_X,New_Z)
     Dens_YZ=f_Dens_XZ(New_Y,New_Z)
-#    Dens_XZ = interpolate.griddata((XZarr[:,0].ravel(), XZarr[:,1].ravel()),XZarr[:,2].ravel(),(New_X, New_Z), method='cubic',fill_value=0)
-#    Dens_YZ = interpolate.griddata((YZarr[:,0].ravel(), YZarr[:,1].ravel()),YZarr[:,2].ravel(),(New_Y, New_Z), method='cubic',fill_value=0)
-
     
     Dens_XZ=Dens_XZ.clip(min=0)
     Dens_YZ=Dens_YZ.clip(min=0)   
     
-    if (np.sum(Dens_XZ) > 0 and np.sum(Dens_YZ) > 0):     
-        Dens_XZ=Dens_XZ/np.sum(Dens_XZ)
-        Dens_YZ=Dens_YZ/np.sum(Dens_YZ)
+    Dens_XZ=Dens_XZ/np.sum(Dens_XZ)
+    Dens_YZ=Dens_YZ/np.sum(Dens_YZ)
+   
+    cumulative_XZ=np.cumsum(Dens_XZ)
+    cumulative_YZ=np.cumsum(Dens_YZ)
     
+    cumulative_nq_XZ=sorted(set(cumulative_XZ))
+    cumulative_nq_YZ=sorted(set(cumulative_YZ))  
+    
+    xx_0_XZ=np.linspace(np.min(m_X),np.max(m_X),len(cumulative_nq_XZ))
+    xx_0_YZ=np.linspace(np.min(m_Y),np.max(m_Y),len(cumulative_nq_YZ))
   
-          
-        cumulative_XZ=np.cumsum(Dens_XZ)
-        cumulative_YZ=np.cumsum(Dens_YZ)
-    
-        cumulative_nq_XZ=sorted(set(cumulative_XZ))
-        cumulative_nq_YZ=sorted(set(cumulative_YZ))  
-    
-        xx_0_XZ=np.linspace(np.min(m_X),np.max(m_X),len(cumulative_nq_XZ))
-        xx_0_YZ=np.linspace(np.min(m_Y),np.max(m_Y),len(cumulative_nq_YZ))
-    
-        ff_XZ = interpolate.UnivariateSpline(cumulative_nq_XZ, xx_0_XZ,ext=1)
-        ff_YZ = interpolate.UnivariateSpline(cumulative_nq_YZ, xx_0_YZ,ext=1)
+    ff_XZ = interpolate.UnivariateSpline(cumulative_nq_XZ, xx_0_XZ,ext=1)
+    ff_YZ = interpolate.UnivariateSpline(cumulative_nq_YZ, xx_0_YZ,ext=1)
         
-        Slice_Ne=np.zeros(Num_Of_Slice_Particles)
-        
-        
+    Slice_Ne=np.zeros(Num_Of_Slice_Particles)
+    Slice_Ne[:]=binnumber_Z*f_Z(Z_Slice_Value)/NumberOfSlices
 # Charge in slice
 #       Slice_Ne[:]=(f_Z(slice_counter*Step_Size+np.min(m_Z)))/SlicesMultiplyFactor
-        Slice_Ne[:]=f_Z(Z_Slice_Value)/SlicesMultiplyFactor        
-        if (np.sum(Slice_Ne))>=0:        
+#    Slice_Ne[:]=f_Z(Z_Slice_Value)/SlicesMultiplyFactor        
+    if (np.sum(Slice_Ne))>0:        
         
 #           Slice_Ne[:]=1.0
-            Full_X=np.append(ff_XZ(density_X),Full_X)
-            Full_Y=np.append(ff_YZ(density_Y),Full_Y)
-            Full_Z=np.append(density_Z,Full_Z)        
-            Full_Ne=np.append(Slice_Ne/len(Slice_Ne),Full_Ne)
+        Full_X=np.append(ff_XZ(density_X),Full_X)
+        Full_Y=np.append(ff_YZ(density_Y),Full_Y)
+        Full_Z=np.append(density_Z,Full_Z)        
+        Full_Ne=np.append(Slice_Ne/len(Slice_Ne),Full_Ne)
     
 print ' \r'    
 print np.shape(Full_X),np.shape(Full_Y),np.shape(Full_Z),np.shape(Full_Ne)    
