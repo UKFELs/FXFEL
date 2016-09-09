@@ -96,6 +96,7 @@ H, edges = np.histogramdd(xyz, bins = (binnumber,binnumber,binnumber),normed=Fal
 print H.shape
 
 n_p=float(np.amax(H))/cube_volume
+
 print 'Np= ',n_p
 
 
