@@ -75,7 +75,7 @@ mA_WGHT = Particles[:,6]
 # The below section calculates size of the bin according
 # to value of Lc (binnumbers=total_length/Lc)
 
-Pi=3.1415
+Pi=np.pi
 k_u=157.075
 a_u=1
 c=3.0e+8
@@ -114,15 +114,15 @@ number_of_bins=20
 print 'Number of bins = ',number_of_bins
 
 binnumber_Z=number_of_bins   
-binnumber_X=10
-binnumber_Y=10
+binnumber_X=20
+binnumber_Y=20
 
 
 
 # End of bin size calculations
 #*************************************************************
-DensityFactor=500
-SlicesMultiplyFactor=5
+DensityFactor=1000
+SlicesMultiplyFactor=10
 
 
 
@@ -250,15 +250,32 @@ Full_Ne=np.zeros(0)
 # Initiate empty array for Z positions or particles
 density_Z=np.zeros(Num_Of_Slice_Particles)
 
-f_Dens_XZ=interpolate.interp2d(XZarr[:,0].ravel(), XZarr[:,1].ravel(),XZarr[:,2].ravel(),kind='cubic')
-f_Dens_YZ=interpolate.interp2d(YZarr[:,0].ravel(), YZarr[:,1].ravel(),YZarr[:,2].ravel(),kind='cubic')
+
+x_hst_lngth=np.max(XZarr[:,0])-np.min(XZarr[:,0])
+y_hst_lngth=np.max(YZarr[:,0])-np.min(YZarr[:,0])
+z_hst_lngth=np.max(XZarr[:,1])-np.min(XZarr[:,1])
+
+t_XZ=np.linspace(np.min(XZarr[:,0])+0.1*z_hst_lngth,np.max(XZarr[:,0])-0.1*x_hst_lngth,3)
+t_YZ=np.linspace(np.min(YZarr[:,0])+0.1*z_hst_lngth,np.max(YZarr[:,0])-0.1*y_hst_lngth,3)
+t_ZZ=np.linspace(np.min(XZarr[:,1])+0.1*z_hst_lngth,np.max(XZarr[:,1])-0.1*z_hst_lngth,3)
+
+f_Dens_XZ=interpolate.LSQBivariateSpline(XZarr[:,0].ravel(), XZarr[:,1].ravel(),XZarr[:,2].ravel(),t_XZ,t_ZZ)
+f_Dens_YZ=interpolate.LSQBivariateSpline(YZarr[:,0].ravel(), YZarr[:,1].ravel(),YZarr[:,2].ravel(),t_YZ,t_ZZ)
+
+#f_Dens_XZ=interpolate.Rbf(XZarr[:,0].ravel(), XZarr[:,1].ravel(),XZarr[:,2].ravel(),function='inverse')
+#f_Dens_YZ=interpolate.Rbf(YZarr[:,0].ravel(), YZarr[:,1].ravel(),YZarr[:,2].ravel(),function='inverse')
+
+#f_Dens_XZ=interpolate.interp2d(XZarr[:,0].ravel(), XZarr[:,1].ravel(),XZarr[:,2].ravel(),kind='cubic')
+#f_Dens_YZ=interpolate.interp2d(YZarr[:,0].ravel(), YZarr[:,1].ravel(),YZarr[:,2].ravel(),kind='cubic')
 
 
 # Plot the density profile XZ
-PLT_X=np.linspace(np.min(m_X),np.max(m_X),100)
-PLT_Z=np.linspace(np.min(m_Z),np.max(m_Z),100)
+PLT_X=np.linspace(np.min(m_X),np.max(m_X),10)
+PLT_Y=np.linspace(np.min(m_Y),np.max(m_Y),10)
+PLT_Z=np.linspace(np.min(m_Z),np.max(m_Z),10)
+print f_Dens_YZ(PLT_Y, PLT_Z)
 import matplotlib.pyplot as plt
-plt.pcolormesh(PLT_X, PLT_Z,f_Dens_XZ(PLT_X, PLT_Z))
+plt.pcolormesh(PLT_Z, PLT_Y,f_Dens_YZ(PLT_Y, PLT_Z))
 plt.show()
 # End of plot
 
