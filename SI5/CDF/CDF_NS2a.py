@@ -121,8 +121,8 @@ binnumber_Y=20
 
 # End of bin size calculations
 #*************************************************************
-DensityFactor=1000
-SlicesMultiplyFactor=10
+DensityFactor=500
+SlicesMultiplyFactor=5
 
 
 
@@ -200,10 +200,10 @@ YZarr=np.zeros(((len(edges_YZ[0])-1)*(len(edges_YZ[1])-1),3))
 # Interpolate density along Z-axis
 x0_Z = np.linspace(0.5*(edges_Z[0][0]+edges_Z[0][1]),0.5*(edges_Z[0][binnumber_Z]+edges_Z[0][binnumber_Z-1]),binnumber_Z)
 y0_Z = Hz
-#z_hst_lngth=np.max(x0_Z)-np.min(x0_Z)
+z_hst_lngth=np.max(x0_Z)-np.min(x0_Z)
 
-#t_knots_z=np.linspace(np.min(x0_Z)+0.2*z_hst_lngth,np.max(x0_Z)-0.2*z_hst_lngth,6)
-#f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z)
+t_knots_z=np.linspace(np.min(x0_Z)+0.2*z_hst_lngth,np.max(x0_Z)-0.2*z_hst_lngth,6)
+f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z)
 f_Z = interpolate.Rbf(x0_Z, y0_Z)
 plt.plot(m_Z,f_Z(m_Z))
 plt.show()
@@ -270,15 +270,18 @@ f_Dens_YZ=interpolate.LSQBivariateSpline(YZarr[:,0].ravel(), YZarr[:,1].ravel(),
 
 
 # Plot the density profile XZ
-PLT_X=np.linspace(np.min(m_X),np.max(m_X),10)
-PLT_Y=np.linspace(np.min(m_Y),np.max(m_Y),10)
-PLT_Z=np.linspace(np.min(m_Z),np.max(m_Z),10)
+PLT_X=np.linspace(np.min(m_X),np.max(m_X),100)
+PLT_Y=np.linspace(np.min(m_Y),np.max(m_Y),100)
+PLT_Z=np.linspace(np.min(m_Z),np.max(m_Z),100)
 print f_Dens_YZ(PLT_Y, PLT_Z)
 import matplotlib.pyplot as plt
 plt.pcolormesh(PLT_Z, PLT_Y,f_Dens_YZ(PLT_Y, PLT_Z))
 plt.show()
 # End of plot
 
+New_X=np.linspace(np.min(m_X),np.max(m_X),100)
+New_Y=np.linspace(np.min(m_Y),np.max(m_Y),100)
+New_Z=np.zeros(100)
 
 for slice_number in range(0,NumberOfSlices):
        
@@ -288,14 +291,8 @@ for slice_number in range(0,NumberOfSlices):
     print 'Completed = ',ProgressValue,' [%] ',Z_Slice_Value,' [m] \r',
 
 # Interpolate curve density for selected slice
-
-
-    New_X=np.linspace(np.min(m_X),np.max(m_X),100)
-    New_Y=np.linspace(np.min(m_Y),np.max(m_Y),100)
-   
-    New_Z=np.zeros(100)
+  
     New_Z=Z_Slice_Value
-
 
     Dens_XZ=f_Dens_XZ(New_X,New_Z)
     Dens_YZ=f_Dens_XZ(New_Y,New_Z)
@@ -303,33 +300,34 @@ for slice_number in range(0,NumberOfSlices):
     Dens_XZ=Dens_XZ.clip(min=0)
     Dens_YZ=Dens_YZ.clip(min=0)   
     
-    Dens_XZ=Dens_XZ/np.sum(Dens_XZ)
-    Dens_YZ=Dens_YZ/np.sum(Dens_YZ)
+    if (np.sum(Dens_XZ) > 0 and np.sum(Dens_YZ) > 0): 
+        Dens_XZ=Dens_XZ/np.sum(Dens_XZ)
+        Dens_YZ=Dens_YZ/np.sum(Dens_YZ)
    
-    cumulative_XZ=np.cumsum(Dens_XZ)
-    cumulative_YZ=np.cumsum(Dens_YZ)
+        cumulative_XZ=np.cumsum(Dens_XZ)
+        cumulative_YZ=np.cumsum(Dens_YZ)
     
-    cumulative_nq_XZ=sorted(set(cumulative_XZ))
-    cumulative_nq_YZ=sorted(set(cumulative_YZ))  
+        cumulative_nq_XZ=sorted(set(cumulative_XZ))
+        cumulative_nq_YZ=sorted(set(cumulative_YZ))  
     
-    xx_0_XZ=np.linspace(np.min(m_X),np.max(m_X),len(cumulative_nq_XZ))
-    xx_0_YZ=np.linspace(np.min(m_Y),np.max(m_Y),len(cumulative_nq_YZ))
+        xx_0_XZ=np.linspace(np.min(m_X),np.max(m_X),len(cumulative_nq_XZ))
+        xx_0_YZ=np.linspace(np.min(m_Y),np.max(m_Y),len(cumulative_nq_YZ))
   
-    ff_XZ = interpolate.UnivariateSpline(cumulative_nq_XZ, xx_0_XZ,ext=1)
-    ff_YZ = interpolate.UnivariateSpline(cumulative_nq_YZ, xx_0_YZ,ext=1)
+        ff_XZ = interpolate.UnivariateSpline(cumulative_nq_XZ, xx_0_XZ,ext=3)
+        ff_YZ = interpolate.UnivariateSpline(cumulative_nq_YZ, xx_0_YZ,ext=3)
         
-    Slice_Ne=np.zeros(Num_Of_Slice_Particles)
-    Slice_Ne[:]=binnumber_Z*f_Z(Z_Slice_Value)/NumberOfSlices
+        Slice_Ne=np.zeros(Num_Of_Slice_Particles)
+        Slice_Ne[:]=binnumber_Z*f_Z(Z_Slice_Value)/NumberOfSlices
 # Charge in slice
 #       Slice_Ne[:]=(f_Z(slice_counter*Step_Size+np.min(m_Z)))/SlicesMultiplyFactor
 #    Slice_Ne[:]=f_Z(Z_Slice_Value)/SlicesMultiplyFactor        
-    if (np.sum(Slice_Ne))>0:        
+        if (np.sum(Slice_Ne))>0:        
         
 #           Slice_Ne[:]=1.0
-        Full_X=np.append(ff_XZ(density_X),Full_X)
-        Full_Y=np.append(ff_YZ(density_Y),Full_Y)
-        Full_Z=np.append(density_Z,Full_Z)        
-        Full_Ne=np.append(Slice_Ne/len(Slice_Ne),Full_Ne)
+            Full_X=np.append(ff_XZ(density_X),Full_X)
+            Full_Y=np.append(ff_YZ(density_Y),Full_Y)
+            Full_Z=np.append(density_Z,Full_Z)        
+            Full_Ne=np.append(Slice_Ne/len(Slice_Ne),Full_Ne)
     
 print ' \r'    
 print np.shape(Full_X),np.shape(Full_Y),np.shape(Full_Z),np.shape(Full_Ne)    
