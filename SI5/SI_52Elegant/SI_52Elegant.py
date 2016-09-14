@@ -5,7 +5,6 @@ Created on Tue Nov 17 14:52:33 2015
 @author: piotrt
 """
 import numpy as np
-import h5py
 import tables
 import os
 import sys
@@ -26,7 +25,6 @@ file_name_base  = (file_input_hdf.split('.')[0]).strip()
 print 'Loading data from SI HDF5...'
 
 f=tables.open_file(file_input_hdf,'r')
-#f=h5py.File(file_input_hdf,'r')
 Electrons=f.root.Particles.read()
 
 X=Electrons[:,0]

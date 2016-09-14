@@ -78,16 +78,17 @@ Z_true=V_z*m_T
 # By some reason data is flipped along Z-axis, to correct it we need to flip it again,
 # therefore below lines that find min Z values and rotate the beam in this point (mirror flip).
 # So e.g. beam instead of looking like <<o will look like o>>
+# MIRROR FLIP REMOVED !!! IGNORE ABOVE !!!
 
 m_Z=m_T*c*Beta_z
-mirror_flip_z=np.min(m_Z)
-m_Z_mr=m_Z-((m_Z-mirror_flip_z)*2)
+#mirror_flip_z=np.min(m_Z)
+#m_Z_mr=m_Z-((m_Z-mirror_flip_z)*2)
 
 No_Particles_Per_Record=np.zeros((linecount,1))
 
 No_Particles_Per_Record[0:len(m_Z)]=(ParticleChargePerRecord/e_ch)
 
-x_px_y_py_z_pz_NE = np.hstack([m_X,m_PX,m_Y,m_PY,m_Z_mr,m_PZ,No_Particles_Per_Record])
+x_px_y_py_z_pz_NE = np.hstack([m_X,m_PX,m_Y,m_PY,m_Z,m_PZ,No_Particles_Per_Record])
 
 
 
