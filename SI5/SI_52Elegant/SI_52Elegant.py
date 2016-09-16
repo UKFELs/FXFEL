@@ -34,10 +34,10 @@ Py=Electrons[:,3]
 Z=Electrons[:,4]
 Pz=Electrons[:,5]
 NE=Electrons[:,6]
-
+particleID=np.arange(1,len(X)+1)
 print 'Processing data...'
 
-P=np.sqrt(Px**2+Py**2+Pz**2)
+P=(np.sqrt(Px**2+Py**2+Pz**2))/(5.36E-28*(ERM*1.E6))
 
 
 Beta_z=Pz/P
@@ -48,7 +48,7 @@ m_t=Z/(c*Beta_z)
 
 
 
-full_array=np.column_stack((X,xp,Y,yp,m_t,P))
+full_array=np.column_stack((X,xp,Y,yp,m_t,P,particleID))
 
 FinalHDF_File=file_name_base+'_Final_HDF.h5'
 FinalSDDS_File=file_name_base+'_full_array.sdds'
@@ -68,7 +68,7 @@ os.system("hdf2sdds %s %s -dataset=spatialPositions"\
 %(FinalHDF_File,FinalSDDS_File))
 TotalCharge=sum(NE)*e_ch
 print 'Creating SDDS output...'
-os.system("sddsconvert %s -rename=columns,D1=x,D2=xp,D3=y,D4=yp,D5=t,D6=p"\
+os.system("sddsconvert %s -rename=columns,D1=x,D2=xp,D3=y,D4=yp,D5=t,D6=p,D7=particleID"\
 %(FinalSDDS_File))
 os.system("sddsprocess %s %s -define=parameter,Charge,%s,units=C"\
 %(FinalSDDS_File,FinalSDDS_File,TotalCharge))
