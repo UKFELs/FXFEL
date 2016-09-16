@@ -60,7 +60,7 @@ for i, row in enumerate(f):
 
 
 
-m_PZ=(5.36E-28*(ERM*1.E6)*m_P)/(np.sqrt((m_XP**2)+(m_YP**2)+1))
+m_PZ=(5.36E-28*(ERM*1.E6)*m_P)/(np.sqrt((m_XP**2)+(m_YP**2)+1.0))
 m_PX=m_PZ*m_XP
 m_PY=m_PZ*m_YP
 
@@ -68,11 +68,12 @@ m_PY=m_PZ*m_YP
 #Beta_z=np.sqrt((m_ZP**2+m_XP**2+m_YP**2)/m_ZP**2)
 
 Beta_z=m_PZ/(np.sqrt(m_PX**2+m_PY**2+m_PZ**2))
+print 'Beta_Z = ',Beta_z
 
 p_tot=np.sqrt((m_PX[:]**2)+(m_PY[:]**2)+(m_PZ[:]**2))
 Gamma=(np.sqrt(1+(p_tot/(me*c))**2))
-V_z=m_PZ/(Gamma*me)
-Z_true=V_z*m_T
+#V_z=m_PZ/(Gamma*me)
+#Z_true=V_z*m_T
 
 
 # By some reason data is flipped along Z-axis, to correct it we need to flip it again,
@@ -81,14 +82,14 @@ Z_true=V_z*m_T
 # MIRROR FLIP REMOVED !!! IGNORE ABOVE !!!
 
 m_Z=m_T*c*Beta_z
-mirror_flip_z=np.min(m_Z)
-m_Z_mr=m_Z-((m_Z-mirror_flip_z)*2)
+#mirror_flip_z=np.min(m_Z)
+#m_Z_mr=m_Z-((m_Z-mirror_flip_z)*2)
 
 No_Particles_Per_Record=np.zeros((linecount,1))
 
 No_Particles_Per_Record[0:len(m_Z)]=(ParticleChargePerRecord/e_ch)
 
-x_px_y_py_z_pz_NE = np.hstack([m_X,m_PX,m_Y,m_PY,m_Z_mr,m_PZ,No_Particles_Per_Record])
+x_px_y_py_z_pz_NE = np.hstack([m_X,m_PX,m_Y,m_PY,m_Z,m_PZ,No_Particles_Per_Record])
 
 
 

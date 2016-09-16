@@ -37,10 +37,10 @@ NE=Electrons[:,6]
 particleID=np.arange(1,len(X)+1)
 print 'Processing data...'
 
-P=(np.sqrt(Px**2+Py**2+Pz**2))/(5.36E-28*(ERM*1.E6))
+P=np.sqrt(Px**2+Py**2+Pz**2)/(5.36E-28*(ERM*1.E6))
 
 
-Beta_z=Pz/P
+Beta_z=Pz/P/(5.36E-28*(ERM*1.E6))
 
 xp=Px/Pz
 yp=Py/Pz
