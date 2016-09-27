@@ -82,19 +82,19 @@ Gamma=(np.sqrt(1+(p_tot/(me*c))**2))
 # MIRROR FLIP REMOVED !!! IGNORE ABOVE !!!
 
 m_Z=m_T*c*Beta_z
-#mirror_flip_z=np.min(m_Z)
-#m_Z_mr=m_Z-((m_Z-mirror_flip_z)*2)
+mirror_flip_z=np.min(m_Z)
+m_Z_mr=m_Z-((m_Z-mirror_flip_z)*2)
 
 No_Particles_Per_Record=np.zeros((linecount,1))
 
 No_Particles_Per_Record[0:len(m_Z)]=(ParticleChargePerRecord/e_ch)
 
-x_px_y_py_z_pz_NE = np.hstack([m_X,m_PX,m_Y,m_PY,m_Z,m_PZ,No_Particles_Per_Record])
+x_px_y_py_z_pz_NE = np.hstack([m_X,m_PX,m_Y,m_PY,m_Z_mr,m_PZ,No_Particles_Per_Record])
 
 
 
 
-output_file=tables.open_file(file_name_base+'.si5','w')
+output_file=tables.open_file(file_name_base+'E2S.si5','w')
 
 # Create hdf5 file
 

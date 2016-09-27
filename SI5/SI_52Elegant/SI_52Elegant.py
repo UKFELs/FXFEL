@@ -45,13 +45,13 @@ Beta_z=Pz/P/(5.36E-28*(ERM*1.E6))
 xp=Px/Pz
 yp=Py/Pz
 m_t=Z/(c*Beta_z)
+min_t=np.min(m_t)
+m_t_mr=m_t-((m_t-min_t)*2)
 
-
-
-full_array=np.column_stack((X,xp,Y,yp,m_t,P,particleID))
+full_array=np.column_stack((X,xp,Y,yp,m_t_mr,P,particleID))
 
 FinalHDF_File=file_name_base+'_Final_HDF.h5'
-FinalSDDS_File=file_name_base+'_full_array.sdds'
+FinalSDDS_File=file_name_base+'_S2E.sdds'
 
 
 print 'Creating final HDF5 output...'

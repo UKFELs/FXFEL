@@ -83,7 +83,7 @@ x_px_y_py_z_pz_NE = np.vstack([norm_x,norm_px,norm_y,norm_py,norm_z,norm_pz,((ma
 
 
 
-output_file=tables.open_file(file_name_base+'.si5','w')
+output_file=tables.open_file(file_name_base+'_A2S.si5','w')
 
 # Create hdf5 file
 
