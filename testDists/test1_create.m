@@ -35,7 +35,7 @@ sigmayd = sigmaxd;
 
 sigmag = 1e-3;
 
-sigmat = 6.9208e-13;
+sigmat = 5.309633769487956e-13;
 
 sigz2 = 13 - (7.5*0.4);
 sigmaedge = 0.4;
