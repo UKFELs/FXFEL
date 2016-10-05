@@ -75,7 +75,7 @@ mA_WGHT = Particles[:,6]
 # The below section calculates size of the bin according
 # to value of Lc (binnumbers=total_length/Lc)
 
-Pi=3.1415
+Pi=np.pi
 k_u=157.075
 a_u=1
 c=3.0e+8
@@ -86,7 +86,7 @@ xyz = np.vstack([mA_X,mA_Y,mA_Z]).T
 size_x=max(mA_X)-min(mA_X)
 size_y=max(mA_Y)-min(mA_Y)
 size_z=max(mA_Z)-min(mA_Z)
-binnumber=100
+binnumber=10
 cube_volume=(size_x*size_y*size_z)/float(binnumber**3)
 print 'Volume of sample cube: ',cube_volume
 # print 'Number of particle in record: ',num_of_particles
@@ -96,6 +96,7 @@ H, edges = np.histogramdd(xyz, bins = (binnumber,binnumber,binnumber),normed=Fal
 print H.shape
 
 n_p=float(np.amax(H))/cube_volume
+
 print 'Np= ',n_p
 
 
@@ -107,15 +108,22 @@ rho=(1/gamma_0)*(((a_u*omega_p)/(4*c*k_u))**(2.0/3.0))
 lambda_u=(2*Pi)/k_u
 lambda_r=(lambda_u/(2*gamma_0**2))*(1+a_u**2)
 Lc=lambda_r/(4*Pi*rho)
-
-
 number_of_bins=int((size_z/Lc)*1.10)
-number_of_bins=20
 print 'Lc = ',Lc
+
+number_of_bins=20
+binnumber_Z=number_of_bins   
+binnumber_X=20
+binnumber_Y=20
 print 'Number of bins = ',number_of_bins
+
 
 # End of bin size calculations
 #*************************************************************
+DensityFactor=1000
+SlicesMultiplyFactor=10
+
+
 
 xyzW = np.vstack((mA_X.flat,mA_Y.flat,mA_Z.flat,mA_WGHT.flat)).T
 
@@ -129,11 +137,12 @@ TotalNumberOfElectrons=np.sum(mA_WGHT)
 
 
 
-mB_X=xyzW[:,0].flat
-mB_Y=xyzW[:,1].flat
-mB_Z=xyzW[:,2].flat
-mB_WGHT=xyzW[:,3].flat
 
+
+m_X=xyzW[:,0].flat
+m_Y=xyzW[:,1].flat
+m_Z=xyzW[:,2].flat
+m_WGHT=xyzW[:,3].flat
 
 # Set the multiplier of desired particle number
 # The highher the number the more time it will take
@@ -141,53 +150,42 @@ mB_WGHT=xyzW[:,3].flat
 # but at the end your particles will have smaller than one what means that 
 # you have less than one electron per particle
 # Currently there is no safety mechanism to avoid this
-DensityFactor=1000
+
 print 'Initial charge of particles = ',TotalNumberOfElectrons*e_ch
 print 'Total number of electrons: ',TotalNumberOfElectrons
-print 'Number of source macroparticles: ',len(mB_X)
-print 'Electrons/macroparticles in source data:',round(TotalNumberOfElectrons/len(mB_X))
-print 'Desired Electrons/macroparticles in output data:',int(round(TotalNumberOfElectrons/(len(mB_X)*DensityFactor)))
+print 'Number of source macroparticles: ',len(m_X)
+print 'Electrons/macroparticles in source data:',round(TotalNumberOfElectrons/len(m_X))
+print 'Desired Electrons/macroparticles in output data:',int(round(TotalNumberOfElectrons/(len(m_X)*DensityFactor)))
 
 # Set desired particle number per slice - best to set the number that will give 
 # an integer when total number of source particles will be divided over it
 # Otherwise your particles will be cut at the end
 # Very low number can give weird results
 
-NumberOfSourceParticles=len(mB_X)
+NumberOfSourceParticles=len(m_X)
 
 
 print 'Macroparticles in job= ',NumberOfSourceParticles
 
-
-
- 
-m_X=mB_X[:]
-m_Y=mB_Y[:]
-m_Z=mB_Z[:]
-m_WGHT=mB_WGHT[:]
           
 m_Xm_Z=np.vstack((mA_X.flat,mA_Z.flat)).T
 m_Ym_Z=np.vstack((mA_Y.flat,mA_Z.flat)).T
 print np.shape(m_Xm_Z),np.shape(m_Ym_Z)
 
-binnumber_Z=number_of_bins   
-#binnumber_Z=100
-
-# Rescale X/Y bin number to 1/10 of the Z bin number - this allows more smoother data in case of sparse particle mesh
-# binnumber_X=int(number_of_bins/10)
-# binnumber_Y=int(number_of_bins/10)
-
-binnumber_X=10  # Lawrence changed this part
-binnumber_Y=10  # Lawrence changed this part
 
 print'Binnumber X,Y,Z = ',binnumber_X,binnumber_Y,binnumber_Z
-Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber_Z,normed=False,weights=m_WGHT.flat)
-#Hy, edges_Y = np.histogramdd(m_Y, bins = binnumber_Y,normed=False,weights=m_WGHT.flat)
-#Hx, edges_X = np.histogramdd(m_X, bins = binnumber_X,normed=False,weights=m_WGHT.flat)
+S_factor=0.15
+Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber_Z,range=((min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
 
+print Hz
 
-HxHz,edges_XZ = np.histogramdd(m_Xm_Z, bins = (binnumber_X,binnumber_Z),normed=False,weights=m_WGHT.flat)
-HyHz,edges_YZ = np.histogramdd(m_Ym_Z, bins = (binnumber_Y,binnumber_Z),normed=False,weights=m_WGHT.flat)
+#Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber_Z,normed=False,weights=m_WGHT)
+
+#HxHz,edges_XZ = np.histogramdd(m_Xm_Z, bins = (binnumber_X,binnumber_Z),normed=False,weights=m_WGHT)
+#HyHz,edges_YZ = np.histogramdd(m_Ym_Z, bins = (binnumber_Y,binnumber_Z),normed=False,weights=m_WGHT)
+
+HxHz,edges_XZ = np.histogramdd(m_Xm_Z, bins = (binnumber_X,binnumber_Z),range=((min(mA_X)-S_factor*size_z,max(mA_X)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
+HyHz,edges_YZ = np.histogramdd(m_Ym_Z, bins = (binnumber_Y,binnumber_Z),range=((min(mA_Y)-S_factor*size_z,max(mA_Y)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
 
 
     #import matplotlib.pyplot as plt
@@ -206,64 +204,47 @@ YZarr=np.zeros(((len(edges_YZ[0])-1)*(len(edges_YZ[1])-1),3))
 
 
 # Interpolate density along Z-axis
-#x0_Z = np.linspace(np.min(m_Z),np.max(m_Z),binnumber_Z)
 x0_Z = np.linspace(0.5*(edges_Z[0][0]+edges_Z[0][1]),0.5*(edges_Z[0][binnumber_Z]+edges_Z[0][binnumber_Z-1]),binnumber_Z)
-
 y0_Z = Hz
+z_hst_lngth=np.max(x0_Z)-np.min(x0_Z)
 
-z_hstgrm_length=0.5*(edges_Z[0][binnumber_Z]+edges_Z[0][binnumber_Z-1])-0.5*(edges_Z[0][0]+edges_Z[0][1])
-
-#t_knots_z=[min(x0_Z)+0.1*z_hstgrm_length,min(x0_Z)+0.25*z_hstgrm_length,np.mean(x0_Z),max(x0_Z)-0.25*z_hstgrm_length,max(x0_Z)-0.1*z_hstgrm_length]
-t_knots_z=[edges_Z[0][0]+0.1*z_hstgrm_length,edges_Z[0][0]+0.25*z_hstgrm_length,(edges_Z[0][binnumber_Z]+edges_Z[0][0])*0.5,edges_Z[0][binnumber_Z]-0.25*z_hstgrm_length,edges_Z[0][binnumber_Z]-0.1*z_hstgrm_length]
-#t_knots_z=[edges_Z[0][0]+0.25*z_hstgrm_length,edges_Z[0][binnumber_Z]-0.25*z_hstgrm_length]
-f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z,ext=0)
-
-
-
-#f_Z = interpolate.UnivariateSpline(x0_Z, y0_Z,k=5)
-#print 0.5*(edges_Z[0][binnumber_Z]+edges_Z[0][binnumber_Z-1]),0.5*(edges_Z[0][0]+edges_Z[0][1])
-#print np.min(m_Z),np.max(mA_Z)
-plt.plot(x0_Z,f_Z(x0_Z))
+t_knots_z=np.linspace(np.min(x0_Z)+0.2*z_hst_lngth,np.max(x0_Z)-0.2*z_hst_lngth,5)
+f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z)
+m_Z_plt=np.linspace(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z,1000)
+f_Z = interpolate.interp1d(x0_Z, y0_Z,kind='cubic')
+plt.plot(m_Z,f_Z(m_Z))
 plt.show()
+Non_Zero_Z=float(np.count_nonzero(Hz))
+print 'Non-zero histogram values in Z = ',Non_Zero_Z
 # Convert XZ/YZ density histograms to XZ_Density/YZ_Density arrays
 for zz in range(1,len(edges_XZ[1])):
   for xx in range(1,len(edges_XZ[0])):
-    XZarr[(xx-1)+(zz-1)*(len(edges_XZ[0])-1),0]=(edges_XZ[0][xx]+edges_XZ[0][xx-1])*.5
-    XZarr[(xx-1)+(zz-1)*(len(edges_XZ[0])-1),1]=(edges_XZ[1][zz]+edges_XZ[1][zz-1])*.5
+    XZarr[(xx-1)+(zz-1)*(len(edges_XZ[0])-1),0]=(edges_XZ[0][xx]+edges_XZ[0][xx-1])*0.5
+    XZarr[(xx-1)+(zz-1)*(len(edges_XZ[0])-1),1]=(edges_XZ[1][zz]+edges_XZ[1][zz-1])*0.5
     XZarr[(xx-1)+(zz-1)*(len(edges_XZ[0])-1),2]=HxHz[xx-1,zz-1]
 
 for zz in range(1,len(edges_YZ[1])):
   for yy in range(1,len(edges_YZ[0])):
-    YZarr[(yy-1)+(zz-1)*(len(edges_YZ[0])-1),0]=(edges_YZ[0][yy]+edges_YZ[0][yy-1])*.5
-    YZarr[(yy-1)+(zz-1)*(len(edges_YZ[0])-1),1]=(edges_YZ[1][zz]+edges_YZ[1][zz-1])*.5
+    YZarr[(yy-1)+(zz-1)*(len(edges_YZ[0])-1),0]=(edges_YZ[0][yy]+edges_YZ[0][yy-1])*0.5
+    YZarr[(yy-1)+(zz-1)*(len(edges_YZ[0])-1),1]=(edges_YZ[1][zz]+edges_YZ[1][zz-1])*0.5
     YZarr[(yy-1)+(zz-1)*(len(edges_YZ[0])-1),2]=HyHz[yy-1,zz-1]
 
-print np.shape(XZarr),np.shape(YZarr)
 
 # Generate random initial slice of X/Y particles set for CDF function - full range (0-1)
 # Slices multiply factor is the number how many layers should be within one Lc distance
-SlicesMultiplyFactor=10
 
 
 
-###### NEW FROM LAWRENCE
-
-#NumberOfSlices=(number_of_bins+1)*SlicesMultiplyFactor
-NumberOfSlices = int(round(size_z / (lambda_r / 20)))
-SlicesMultiplyFactor = NumberOfSlices / (number_of_bins+1)
-
+NumberOfSlices=int(SlicesMultiplyFactor*((max(mA_Z)-S_factor*size_z)-(min(mA_Z)+S_factor*size_z))/(4*Pi*rho*Lc))
 Num_Of_Slice_Particles=int(NumberOfSourceParticles*DensityFactor/NumberOfSlices)
 
-Num_Of_Slice_Particles=1000
-
-###### END OF NEW FROM LAWRENCE
-
+print 'Number of particles in each slice = ',Num_Of_Slice_Particles
+print 'Number of slices = ',NumberOfSlices
 
 
 Step_Size=(np.max(m_Z)-np.min(m_Z))/NumberOfSlices
 
-density_Y=np.random.uniform(low=0, high=1, size=(Num_Of_Slice_Particles))
-density_X=np.random.uniform(low=0, high=1, size=(Num_Of_Slice_Particles))
+
 
 Full_X=np.zeros(0)
 Full_PX=np.zeros(0)
@@ -275,63 +256,110 @@ Full_Ne=np.zeros(0)
 
 
 
-slice_counter=0
+x_hst_lngth=np.max(XZarr[:,0])-np.min(XZarr[:,0])
+y_hst_lngth=np.max(YZarr[:,0])-np.min(YZarr[:,0])
+z_hst_lngth=np.max(XZarr[:,1])-np.min(XZarr[:,1])
+
+t_XZ=np.linspace(np.min(XZarr[:,0])+0.1*z_hst_lngth,np.max(XZarr[:,0])-0.1*x_hst_lngth,7)
+t_YZ=np.linspace(np.min(YZarr[:,0])+0.1*z_hst_lngth,np.max(YZarr[:,0])-0.1*y_hst_lngth,7)
+t_ZZ=np.linspace(np.min(XZarr[:,1])+0.1*z_hst_lngth,np.max(XZarr[:,1])-0.1*z_hst_lngth,7)
+
+f_Dens_XZ=interpolate.LSQBivariateSpline(XZarr[:,0].ravel(), XZarr[:,1].ravel(),XZarr[:,2].ravel(),t_XZ,t_ZZ)
+f_Dens_YZ=interpolate.LSQBivariateSpline(YZarr[:,0].ravel(), YZarr[:,1].ravel(),YZarr[:,2].ravel(),t_YZ,t_ZZ)
+
+#f_Dens_XZ=interpolate.interp2d(XZarr[:,0].ravel(), XZarr[:,1].ravel(),XZarr[:,2].ravel())
+#f_Dens_YZ=interpolate.interp2d(YZarr[:,0].ravel(), YZarr[:,1].ravel(),YZarr[:,2].ravel())
+
+
+# Plot the density profile XZ
+PLT_X=np.linspace(min(mA_X)-S_factor*size_z,max(mA_X)+S_factor*size_z,100)
+PLT_Y=np.linspace(min(mA_Y)-S_factor*size_z,max(mA_Y)+S_factor*size_z,100)
+PLT_Z=np.linspace(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z,100)
+print f_Dens_YZ(PLT_Y, PLT_Z)
+import matplotlib.pyplot as plt
+plt.pcolormesh(PLT_Z, PLT_X,f_Dens_XZ(PLT_X, PLT_Z))
+plt.show()
+# End of plot
+
+New_X=np.linspace(min(mA_X)-S_factor*size_z,max(mA_X)+S_factor*size_z,100)
+New_Y=np.linspace(min(mA_Y)-S_factor*size_z,max(mA_Y)+S_factor*size_z,100)
+New_Z=np.zeros(100)
+
+
+#CDF_XZ=np.zeros(NumberOfSlices)
+#CDF_YZ=np.zeros(NumberOfSlices)
+#for slice_number in range(0,NumberOfSlices):
+#    New_Z=(slice_number*Step_Size)+np.min(m_Z)
+    
+#    Dens_XZ=f_Dens_XZ(New_X,New_Z)
+#    Dens_YZ=f_Dens_XZ(New_Y,New_Z)
+    
+#    Dens_XZ=Dens_XZ.clip(min=0)
+#    Dens_YZ=Dens_YZ.clip(min=0)   
+
+#    CDF_XZ[slice_number]=np.sum(Dens_XZ) 
+#    CDF_YZ[slice_number]=np.sum(Dens_YZ)
+
+
+#max_CDF_XZ=np.max(CDF_XZ)
+#max_CDF_YZ=np.max(CDF_YZ)
+#print 'Max CDF_XZ =',max_CDF_XZ
+#print 'Max CDF_YZ =',max_CDF_YZ
+
+
+# Initiate empty array for Z positions or particles
+density_Z=np.zeros(Num_Of_Slice_Particles)
+density_Y=np.random.uniform(low=0, high=1, size=(Num_Of_Slice_Particles))
+density_X=np.random.uniform(low=0, high=1, size=(Num_Of_Slice_Particles))
+Slice_Ne=np.zeros(Num_Of_Slice_Particles)
+
 for slice_number in range(0,NumberOfSlices):
        
     Z_Slice_Value=(slice_number*Step_Size)+np.min(m_Z)
-    density_Z=np.zeros(Num_Of_Slice_Particles)
-    density_Z[:]=(slice_number*Step_Size)+np.min(m_Z)
-    ProgressValue=100*((Z_Slice_Value-min(m_Z))/size_z)
-#    print 'Z slice value = ',Z_Slice_Value,' m\r',
+    density_Z[:]=Z_Slice_Value
+    ProgressValue=100*((Z_Slice_Value-np.min(m_Z))/size_z)
     print 'Completed = ',ProgressValue,' [%] ',Z_Slice_Value,' [m] \r',
 
 # Interpolate curve density for selected slice
-
-
-    New_X=np.linspace(min(m_X),max(m_X),100)
-    New_Y=np.linspace(min(m_Y),max(m_Y),100)
-   
-    New_Z=np.zeros(100)
+  
     New_Z=Z_Slice_Value
 
-#    XZarr_SL=XZarr[((XZarr[:,1]<=(Z_Slice_Value+(Step_Size*20))) & (XZarr[:,1]>=Z_Slice_Value-(Step_Size*20)))]
-#    YZarr_SL=YZarr[((YZarr[:,1]<=(Z_Slice_Value+(Step_Size*20))) & (YZarr[:,1]>=Z_Slice_Value-(Step_Size*20)))]
-
-
-    Dens_XZ = interpolate.griddata((XZarr[:,0].ravel(), XZarr[:,1].ravel()),XZarr[:,2].ravel(),(New_X, New_Z), method='cubic',fill_value=0)
-    Dens_YZ = interpolate.griddata((YZarr[:,0].ravel(), YZarr[:,1].ravel()),YZarr[:,2].ravel(),(New_Y, New_Z), method='cubic',fill_value=0)
-
-    
+    Dens_XZ=f_Dens_XZ(New_X,New_Z)
+    Dens_YZ=f_Dens_YZ(New_Y,New_Z)
     Dens_XZ=Dens_XZ.clip(min=0)
     Dens_YZ=Dens_YZ.clip(min=0)   
-
-    if (np.sum(Dens_XZ) > 0 and np.sum(Dens_YZ) > 0):     
+#    plt.plot(New_X,Dens_XZ)
+ #   plt.show()
+    if (np.sum(Dens_XZ) > 0 and np.sum(Dens_YZ) > 0): 
         Dens_XZ=Dens_XZ/np.sum(Dens_XZ)
         Dens_YZ=Dens_YZ/np.sum(Dens_YZ)
-    
-  
-          
+   
         cumulative_XZ=np.cumsum(Dens_XZ)
         cumulative_YZ=np.cumsum(Dens_YZ)
     
         cumulative_nq_XZ=sorted(set(cumulative_XZ))
         cumulative_nq_YZ=sorted(set(cumulative_YZ))  
     
-        xx_0_XZ=np.linspace(np.min(m_X),np.max(m_X),len(cumulative_nq_XZ))
-        xx_0_YZ=np.linspace(np.min(m_Y),np.max(m_Y),len(cumulative_nq_YZ))
-    
+        xx_0_XZ=np.linspace(np.min(New_X),np.max(New_X),len(cumulative_nq_XZ))
+        xx_0_YZ=np.linspace(np.min(New_Y),np.max(New_Y),len(cumulative_nq_YZ))
+  
         ff_XZ = interpolate.UnivariateSpline(cumulative_nq_XZ, xx_0_XZ,ext=1)
         ff_YZ = interpolate.UnivariateSpline(cumulative_nq_YZ, xx_0_YZ,ext=1)
         
-        Slice_Ne=np.zeros(Num_Of_Slice_Particles)
         
-        
-   # Charge in slice
-        slice_counter=slice_counter+1
-        Slice_Ne[:]=(f_Z(slice_counter*Step_Size+np.min(m_Z)))/SlicesMultiplyFactor        
+        Slice_Ne[:]=Non_Zero_Z*f_Z(Z_Slice_Value)/float(NumberOfSlices)
+# Charge in slice
+#       Slice_Ne[:]=(f_Z(slice_counter*Step_Size+np.min(m_Z)))/SlicesMultiplyFactor
+#    Slice_Ne[:]=f_Z(Z_Slice_Value)/SlicesMultiplyFactor        
         if (np.sum(Slice_Ne))>0:        
-        #Slice_Ne[:]=(f_Z(slice_number*Step_Size+np.min(m_Z)))/SlicesMultiplyFactor
+            #scale_CDF_XZ=np.max(cumulative_nq_XZ)-np.min(cumulative_nq_XZ)
+            #scale_CDF_YZ=np.max(cumulative_nq_YZ)-np.min(cumulative_nq_YZ)
+            #print scale_CDF_XZ,scale_CDF_YZ
+            #density_XZ=scale_CDF_XZ/density_X
+            #density_YZ=scale_CDF_YZ/density_Y
 #           Slice_Ne[:]=1.0
+            #density_Y=np.random.uniform(low=min(cumulative_nq_YZ), high=max(cumulative_nq_YZ), size=(Num_Of_Slice_Particles))
+            #density_X=np.random.uniform(low=min(cumulative_nq_XZ), high=max(cumulative_nq_XZ), size=(Num_Of_Slice_Particles))
             Full_X=np.append(ff_XZ(density_X),Full_X)
             Full_Y=np.append(ff_YZ(density_Y),Full_Y)
             Full_Z=np.append(density_Z,Full_Z)        
@@ -344,14 +372,25 @@ Full_PX = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PX.
 Full_PY = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PY.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
 Full_PZ = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PZ.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
 
+#rbf_px=interpolate.Rbf(mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel(),mA_PX.ravel())
+#rbf_py=interpolate.Rbf(mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel(),mA_PY.ravel())
+#rbf_pz=interpolate.Rbf(mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel(),mA_PZ.ravel())
+
+#Full_PX=rbf_px(Full_X, Full_Y, Full_Z)
+#Full_PY=rbf_py(Full_X, Full_Y, Full_Z)
+#Full_PZ=rbf_pz(Full_X, Full_Y, Full_Z)
+
 Rand_Z=Step_Size*(np.random.random(len(Full_Z)) - 0.5)
 print Rand_Z
 Full_Z=Full_Z+(Rand_Z/np.sqrt(Full_Ne))
 
  
-output_file=tables.open_file(file_name_base+'_NS.si5','w')
+output_file=tables.open_file(file_name_base+'_NSd.si5','w')
 
 x_px_y_py_z_pz_NE = np.vstack([Full_X.flat,Full_PX.flat,Full_Y.flat,Full_PY.flat,Full_Z.flat,Full_PZ.flat,Full_Ne.flat]).T
+#NaN_Mask=~np.any(np.isnan(x_px_y_py_z_pz_NE), axis=1)
+#x_px_y_py_z_pz_NE=x_px_y_py_z_pz_NE[NaN_Mask]
+
 print 'Final charge of particles = ',np.sum(x_px_y_py_z_pz_NE[:,6]*e_ch)  
 
 
@@ -376,11 +415,11 @@ output_file.close()
 
 
 
-plt.title('Density profiles')
-plt.xlabel('Z')
-plt.ylabel('Density')
-plt.hist(Full_Z,weights=Full_Ne,bins=number_of_bins,label='Density histogram of new data set')
-plt.grid(True)
-plt.legend(loc='upper right')
-plt.show()
+#plt.title('Density profiles')
+#plt.xlabel('Z')
+#plt.ylabel('Density')
+#plt.hist(Full_Z,weights=Full_Ne,bins=number_of_bins,label='Density histogram of new data set')
+#plt.grid(True)
+#plt.legend(loc='upper right')
+#plt.show()
 
