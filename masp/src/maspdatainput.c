@@ -1,6 +1,7 @@
 /*****************************************
 *  pacodatainput.c  Input, randomisation *
 *  and scaling of raw data               *
+*  Version 0.7  (21/08/2016)             *
 *****************************************/
 
 
@@ -9,7 +10,7 @@
 ******************************************/
 
 int comparison(const void * a, const void * b)
-{
+{  //1
 	double q;
 	Record *x = (Record *) a;
 	Record *y = (Record *) b;
@@ -17,9 +18,7 @@ int comparison(const void * a, const void * b)
 	if (q<0) return (-1);
 	else if (q>0)  return 1;
     else return 0;
-}
-
-
+}  //1
 
 /****************************************
 *  This auxiliary function scans a line *
@@ -31,7 +30,7 @@ int comparison(const void * a, const void * b)
 ****************************************/
 
 int getNext( int p, char * zz, char * line)
-{
+{  //1
 	int q = 0, s=p;
 	while (line[s] == ' ')
 	   s++;
@@ -41,7 +40,7 @@ int getNext( int p, char * zz, char * line)
 	   zz[q++] = line[s++];
 	zz[q] = 0;
 	return s;
-}
+}  //1
 
 /****************************************
 * This function reads data into array v *
@@ -83,30 +82,24 @@ int readData( FILE * fs)
        int p = 0;
        int n=0;
        int kk = 0;
-       while (1)
+
+       for (j=0; j<7; j++)
        { //3
+		  int r;
 		  p = getNext(p,next,line);
-           if (p < 0)
+          if (p < 0)
 		  { //4
-			  sprintf(nb,"Not enough data in record %d\n",numberOfRecords+1);
+			  sprintf(nb,"r= %d next = %s Bad data in record %d\n",r,next,numberOfRecords+1);
 			  die(nb,9);
 
 	      } //4
-		  int r = sscanf(next, "%le", &dummy);
+		  r = sscanf(next, "%le", &dummy);
 		  if (r != 1)
 		  {  //4
 			  sprintf(nb,"Bad data in record %d\n",numberOfRecords+1);
               die (nb,10);
 	      }  //4
-	      n++;
-	      for(j=0; j<7; j++)
-	      if (n-1 == data[j])
-	      { //4
-			  w.v[j] = dummy;
-	          kk++;
-	      }  //4
-          if(kk==7)
-              break;
+	      w.v[j] = dummy;
        } //3
      if (numberOfRecords == vSize)
      { //3          // Just grab more space (knowing it will be contiguous)
@@ -158,7 +151,10 @@ int readData( FILE * fs)
               if (v[k].v[j] > maxs[j]) maxs[j] = v[k].v[j];
          } //2
       for (j=0; j<6; j++)
-   	     range[j] = maxs[j]-mins[j];
+      {
+	     range[j] = maxs[j]-mins[j];
+             printf("maxs[%d] = %le min[%d]= %le range[%d] = %le\n",j,maxs[j],j,mins[j],j,range[j]);
+      }
       volume = 1.0;
       for (k = 0; k < 6; k+=2)
 		  volume *= range[k]/dims[k].resolution;

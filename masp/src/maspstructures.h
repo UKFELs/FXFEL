@@ -1,49 +1,56 @@
-/**********************
-* maspstructures.h    *
-* Various structures  *
-**********************/
+/****************************
+* maspstructures.h          *
+* Various structures        *
+* Version 0.7  (21/08/2016) *
+****************************/
 
-typedef struct Record {           // A line of input from the electron generator
-	                 double v[7]; // Gamma  and arious other numbers
-	                              //  in the input data are omitted. The
-                      } Record;   // weight is put into the seventh column
 extern int key;
 
+// A line of input from the electron generator
+// Gamma  and various other numbers
+// in the input data are omitted. The
+// weight is put into the seventh column
+
+typedef struct Record {
+	                 double v[7];
+                      } Record;
+
+
+// A true position in six dimensions
 
 typedef struct Position{
-	                  double z[6];    // A true position in six dimensions
-		       } Position;
+	                      double z[6];
+		               } Position;
 
 
-typedef struct OutputRecord{    // An output record
-	                     Position p;
-	                     double weight;
-			   }   OutputRecord;
+// An output record
+
+typedef struct OutputRecord{
+	                            Position p;
+	                            double weight;
+	             		   }   OutputRecord;
 
 
-typedef struct DensityRecord{   // A record of electron density
-                                // for a given cell
-                              double x;
-                              double y;
-                              double z;
-                              double charge;
-                              double density;
-			    } DensityRecord;
+// A cell in internal representation. v is
+// six cell coordinates collapsed into a long
 
-
-typedef struct Cell {                 // A cell in internal representation
-                       long v;        // six cell coordinates collapsed into a long
+typedef struct Cell {
+                       long v;
                        float charge;
-		    }  Cell;
+		            }  Cell;
 
 
-typedef struct Element {       // What binary trees are made of
+// What binary trees are made of
+
+typedef struct Element {
 	                      Cell cell;       // A cell in internal representation
 	                      struct Element * fore;  // Forward and backward
 	                      struct Element * back;  // references
-		       }  Element;
+		               }  Element;
 
-typedef struct Dimension{       // Properties of a dimension
+// Properties of a dimension
+
+typedef struct Dimension{
                           int resolution;
                           double scatter;
                           int scatterIndex;
@@ -51,17 +58,16 @@ typedef struct Dimension{       // Properties of a dimension
                         } Dimension;
 
 
-typedef struct ScatterRule{      // Properties of a scatter rule
+// Properties of a scatter rule
+
+typedef struct ScatterRule{
 	                    char scatterName[20];
 	                    int size;
 	                    double interval;
 	                    double * values;
-			  } ScatterRule;
+			              } ScatterRule;
 
 
-typedef struct Binary3{    // Used for binary output of weights
-                          float v[4];
-				      }  Binary3;
 
 
 

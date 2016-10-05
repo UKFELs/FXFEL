@@ -5,13 +5,18 @@
 *  This version is for the ARCHIE_WEST multi-        *
 *  processor computer                                *
 *  Author:             Andrew Colin                  *
-*  User documentation: ElectronBeamConditioning.pdf  *
-*  Date :              August 15st  2015             *
-*  Version number:     0.04                          *
+*  User documentation: The FELFX Simulator     .pdf  *
+*  Date :              August 21st 2016              *
+*  Version number:     0.7                           *
 *  Latest mod:         See notes for 150316,150601,  *
 *                      150801                        *
+**  This version allows control of the number of    **
+** significant figures in numbers written to the    **
+** output file. Put "Decimals = n" (for 2<=n<=15)   **
+** in the parameter file.                           **
 *  Note : all functions with double {{ and }}        *
-*  brackets are executed by core 0 only.             *
+*  brackets are executed by core 0 only. Each double *
+*  bracket counts as one-and-a-half brackets.        *
 *****************************************************/
 
 
@@ -21,8 +26,6 @@
 #include <math.h>
 #include <time.h>
 #include <setjmp.h>
-// #define DT 1   // To include distribution test
-// #define TS 1   // To include tree statistics
 #include "mpi.h"
 #include "maspstructures.h"
 #include "masp.h"
@@ -31,9 +34,6 @@
 #include "maspdatainput.c"
 #include "MPIstuff.c"
 #include "masptree.c"
-#include "maspweight.c"
-#include "masphisto.c"
-#include "maspbunch.c"
 #include "maspparticles.c"
 
 /****************************************************
@@ -42,7 +42,7 @@
 * See "Distributing fat particles" to find out what *
 * I am talking about, but basically, here it is:    *
 * Every fat electron is aimed at a single cell, but *
-* it gets divided into macro particles that appear  *
+* it gets divided into micro particles that appear  *
 * in cells close by. The number of slots in any     *
 * direction depends on the scatter constant of that *
 * dimension.  If it is 1.0, then we assume that     *
@@ -73,20 +73,18 @@
 ****************************************************/
 
 void setPlotSizes()
-{{
+{{  //1.5
 	int j;
 	for (j=0; j<DIMENSIONS; j++)
-	{
+	{  //2
 		double q = dims[j].scatter;
 		plotSizes[j] = ((int)floor(q*2*spread+0.5)) | 1;
 		plotMidPoints[j] = plotSizes[j]>>1;
 		plot [j] = (double *) (localMalloc(plotSizes[j] * sizeof(double)));
 		if (plot[j] == NULL)
-		{
 			die("Not enough space for plot in setPlotSizes (very unlikely!)\n",88);
-    	}
-    }
-}}
+    }  //2
+}}  //1.5
 
 
 
@@ -97,16 +95,16 @@ void setPlotSizes()
 **************************************/
 
 void setKeyAxis()
-{{
+{{  //1.5
 	int q=0,j;
 	key = 0;
 	for (j=0; j<6; j++)
 	if  (dims[j].resolution > q)
-	{
+	{ //2
 		q = dims[j].resolution;
 			key = j;
-	}
-}}
+	}  //2
+}}  //1.5
 
 
 /************************************************
@@ -140,12 +138,13 @@ void startCore0(char * pf)
     	}  //2
 
     	//  If no tasks identified, activate them all
-    	if (stringSet[1] == 0 && stringSet[2] == 0 && stringSet[3] == 0 && stringSet[4] == 0)
+    	if (stringSet[1] == 0)
     	{  //2
-			stringSet[1]=1;stringSet[2]=1;stringSet[3]=1;stringSet[4]=1;
+			stringSet[1]=1;
     	}  //2
 
-    	in = fopen(files[0],"r");
+
+        in = fopen(files[0],"r");
 		if (in == NULL)
 		{  //2
 			sprintf(nb,"Could not open input file %s \n", files[0]);
@@ -153,29 +152,32 @@ void startCore0(char * pf)
 		}  //2
         printf("Opened %s as input file\n",files[0]);
 
-	    // Open all output files needed
-
-	    for(j=1; j<= 4; j++)
-		{
+        if (stringSet[1])
+        {  //2
+			       // Transfer microparticle output file name to all cores
+			if (strlen(files[1]) > 38)
+			{  //3
+				sprintf(nb, "Microparticle file name too long :%s\n",files[1]);
+				die(nb,777);
+		    }  //3
+				strcpy(microfile,files[1]);
+	    }  //2
+	    else
+	      strcpy(microfile, "dummy");
+          j=1;
+		{  //2
 			if (stringSet[j])
-		    {
-			    out[j-1] = fopen(files[j],"w");
-	            if (out[j-1] == NULL)
-	            {
+		    {  //3
+			    out = fopen(files[j],"w");
+	            if (out == NULL)
+	            {  //4
 			       sprintf(nb,"Could not open output file %s \n", files[j]);
 			       die(nb,6);
-	            }
+	            } //4
 	             printf ("Opened %s as an output file. \n",files[j]);
-		    }
-	    }
+		    } //3
+	    }  //2
         setKeyAxis();
-
-		for (j = 0; j<100000; j++)
-		{
-			pt[j] = 0;
-			pw[j] = 0;
-		}
-
 }}  // 1.5
 
 
@@ -184,7 +186,7 @@ void startCore0(char * pf)
 *********************************************/
 
 void initialiseData()
-{{
+{{  //1.5
 		readData(in);
 		scale();
                   // Set number of records sent to each core
@@ -196,56 +198,28 @@ void initialiseData()
         printf("Number of Records = %d Number Of Records per core = %d\n",numberOfRecords,localNumberOfRecords);
         for (j = 0; j < np; j++)
 			coreBoundaries[j] = v[j*localNumberOfRecords].v[key];
-}}
+}}  //1.5
 
-/*******************************************
-* This function examines the scaled data   *
-* and finds the range with the highest     *
-* polulation in each of the six dimensions.*
-* This is to get the best sample for the   *
-* bunching estimates                       *
-*******************************************/
-
-
-
-void setHighest()
-{ //1
-	int * h;
-	int k,z,q,a;
-	for( k = 0; k < 6; k++)
-	{  //2
-	   h = (int *)(mem+soFar);   //  Reserve some space for a bit
-	   z = dims[k].resolution;
-	   for (q = 0; q<= z; q++)
-	       h[q] = 0;
-	   for (q=0; q < numberOfRecords; q++)
-		   h[(int)(v[q].v[k])]++;
-	   a=0; highest[k] = 0;
-	   for (q = 0; q<=z; q++)
-	   if (h[q] > a)
-	   {  //3
-	      a = h[q];
-	      highest[k] = q;
-       }  //3
-    }//2
-} //1
-
-
-
-
-
-
-
+/***************************
+* Where it all starts ...  *
+***************************/
 
 
 int main(int argc, char* argv[])
 {  //1
    // For all cores
-    int j, source;
-
+    int j, source,jj,kk;
+    double grandTotalOut;
 	MPI_Init(&argc,&argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 	MPI_Comm_size(MPI_COMM_WORLD,&np);
+	MPI_Errhandler_set(MPI_COMM_WORLD, MPI_ERRORS_RETURN);
+
+	if (np > MAX_CORES)
+	{  //2
+		printf("Too many cores. Maximum is%d\n",MAX_CORES);
+		exit(1);
+    }  //2
     totalTime += (MPI_Wtime() - startTime);
     MPI_Barrier(MPI_COMM_WORLD);
     startTime = MPI_Wtime();
@@ -255,8 +229,7 @@ int main(int argc, char* argv[])
 
 	JUMP = 10 * np;
     if (myRank == 0)
-
-		printf("Number of threads  = %d\n",np);
+		printf("Number of threads  = %d Myrank = %d\n",np,myRank);
 
 	initialiseMemory();    // Organise local memory
 
@@ -267,62 +240,49 @@ int main(int argc, char* argv[])
 	dummy = grandom(&idum);        // This will still work after 2038 I think!
 
 	if (myRank == 0)
-	  startCore0(argv[1]);
-
+	startCore0(argv[1]);
+	                     // Next bit must happen after parameters have been read
+    jj = decimals+7;     // Set up format for output
+    kk = (decimals%4)+1; // The number of characters must be divisible by 4
+    sprintf(format,"%%+%d.%dle,%%+%d.%dle,%%+%d.%dle,%%+%d.%dle,%%+%d.%dle,%%+%d.%dle,%%+%d.%dle%%%ds",
+            jj,decimals,jj,decimals,jj,decimals,jj,decimals,jj,decimals,jj,decimals,jj,decimals,kk);
+    recordLength = (7*jj+kk+6);
     coreBoundaries = (double*) (localMalloc(np*sizeof(double)));  // This happens for all cores
 
+   transferParameters();  // Transfers parameters to all cores
 
-	transferParameters();  // Transfers parameters to all cores
+
     setPlotSizes();    // for all cores
 
     if (myRank == 0)
-    {{//2
+    {{//2.5
 		initialiseData();
-		setHighest();
-    }}  //2
+    }}  //2.5
    totalTime += (MPI_Wtime() - startTime);
    MPI_Barrier(MPI_COMM_WORLD);
    startTime = MPI_Wtime();
    if(stringSet[1])
-   {
+   { //2
 	   if (myRank == 0)
 	      printf("Doing Macroparticles\n");
 	   doMacroparticles();
-   }
-   if(stringSet[2]&& myRank == 0)
-   {
-		   printf("Doing Histogram\n");
-		   doHistogram();
-   }
-   if(stringSet[3]&& myRank == 0)
-   {
-		   printf("Doing Cell weights\n");
-		   doWeights();
-   }
-
-   if(stringSet[4]&& myRank == 0)
-   {
-	  printf ("Doing Bunching test\n");
-	  doBunching();
-   }
-
+   }  //2
+   MPI_Reduce (&totalOutWeight,&grandTotalOut,1,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
          if (myRank ==0)
-   {{ //3
-        fclose(out[0]);
+   {{ //2.5
 
         printf("Total input weight = %lf\n",totalInWeight);
-        printf("Total output weight = %lf\n",totalOutWeight);
-        printf("Percentage captured = %4.3lf\n",100*totalOutWeight/totalInWeight);
+        printf("Total output weight = %lf\n",grandTotalOut);
+        printf("Percentage captured = %4.3lf\n",100*grandTotalOut/totalInWeight);
         fprintf(monitor,"Total input weight = %lf\n",totalInWeight);
-        fprintf(monitor,"Total output weight = %lf\n",totalOutWeight);
-        fprintf(monitor, "Percentage captured = %4.3lf\n",100*totalOutWeight/totalInWeight);
+        fprintf(monitor,"Total output weight = %lf\n",grandTotalOut);
+        fprintf(monitor, "Percentage captured = %4.3lf\n",100*grandTotalOut/totalInWeight);
 		printf(" Time with %d cores = %lf seconds\n", np, finish - start);
 		fprintf(monitor, " Time with %d cores = %lf seconds\n", np, finish - start);
 
 		fclose(in);
 		fclose(monitor);
-      }}  //3
+      }}  //2.5
    MPI_Finalize();
-
 } //1
 
