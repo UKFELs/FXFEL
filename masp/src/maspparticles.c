@@ -1,60 +1,72 @@
+
+/*************************************
+* Maspparticles.c handles particles  *
+* Version 0.7  (21/08/2016)          *
+*************************************/
+
+
 /**************************************
 *  This function takes a cell with an *
 *  expectation > threshold.           *
 *  If noise is needed,the expectation *
 *  is replaced by a Poisson variate.  *
 *  If this variate is zero the cell   *
-*  discarded
+*  discarded. Otherwise it is output  *
+*  using the MPI parallel-write       *
+*  feature. All records must be the   *
+*  same length ('cos the file layout  *
+*  must decided in advance) and the   *
+*  number of characters depends on    *
+*  setting of the Decimals parameter. *
 **************************************/
 
 void writeRealCell (Cell v)
-{{   //1
+{   //1
 	OutputRecord t;
-    float bb[7];     // Final record for printing
+    double bb[7];     // Final record for printing
     short ww[6];
+    char dump [300];
     double s,shift;
-    int j,k,OK;
-    if (stringSet[4] == 1)  // Decide if this cell is elegible
-       OK = elegible (ww);  // for inclusion in the bunching statistics
-    else OK = -1;
+    int j,k;
     expand(v.v,ww);         // Decode coordinates
     for (j=0; j<6; j++)     // Set up output record
        t.p.z[j] = ww[j]+0.5;
     t.weight = v.charge;
-    if (!nonoise)          // Bring in the noise
+    if (!nonoise)          // Bring in the noise displacement
+                           // Poisson function of weight already
+                           // done if necessary
     { //2
-		k = poisson(t.weight);
-		if(k == 0)         // Ignore cells with zero weight
-		   return;
-        t.weight = (double) k;
-        s = 1.0/sqrt(t.weight);
+	    s = 1.0/sqrt(t.weight);
         for(j=0; j<6; j++)  // Attach rectangular noise
            t.p.z[j] += s*(grandom(&idum)-0.5);
     } //2
-    if(OK >=0)    // Keep these values for bunching check
-    {  //2
-		pt[OK+ww[key]] = t.p.z[key];
-		pw[OK+ww[key]] = t.weight;
-    }  //2
     totalOutWeight += t.weight;
-    for( j=0; j<6; j++)
-       t.p.z[j] = mins[j] + t.p.z[j] *(range[j]/dims[j].resolution);
-		     //Set up the output record in the right order
-	for(j=0; j<7; j++)
-	{ //2
-		k = output[j];
-		if (k == 6)
-		  bb[j] = t.weight;
-		else
-		  bb[j] = t.p.z[k];
-	} //2
-	if (binary)
-	    fwrite((void *) bb,sizeof(float),7,out[0]);
-    else
-        fprintf(out[0],
-          "%10.5lg,%10.5lg,%10.5lg,%10.5lg,%10.5lg,%10.5lg,%10.5lg\n",
-          bb[0],bb[1],bb[2],bb[3],bb[4],bb[5],bb[6]);
-}}   //1
+
+    for(j=0; j<6; j++)
+    {  //2
+       double dd = t.p.z[j];
+       double ff = range[j]/dims[j].resolution;
+       t.p.z[j] *= ff;
+       t.p.z[j] += mins[j];
+    }  //2
+ 		     //Set up the output record in the right order
+	for(j=0; j<6; j++)
+		  bb[j] = t.p.z[j];
+	bb[6] = t.weight;
+    sprintf(dump, format,
+          bb[0],bb[1],bb[2],bb[3],bb[4],bb[5],bb[6],"\n");
+          if (strlen(dump) != recordLength)
+    {  //2
+		  printf("Format = %s\n",format);
+          printf("Dump=%s",dump);
+          printf ("Record length = %d \n",(int)(strlen(dump)));
+		  exit(1);
+	}  //2
+
+	j = MPI_File_write(mf, dump, recordLength,MPI_CHAR,&status);
+	if (j != MPI_SUCCESS)
+	   handleError("File write fails",myRank,j);
+ }   //1
 
 
 /******************************************
@@ -66,7 +78,7 @@ void writeRealCell (Cell v)
 
 
 double scatWeight (ScatterRule a, double val)
-{
+{  //1
    double t;
    if (val < -3)val = -3;
    if (val > 3) return 1.0;
@@ -75,10 +87,7 @@ double scatWeight (ScatterRule a, double val)
    int lowx = (int)(floor(v));
    double f = v-lowx;
    return a.values[lowx] * (1-f) + a.values[lowx+1] * f;
-}
-
-
-
+}  //1
 
 
 /**************************************************
@@ -88,54 +97,48 @@ double scatWeight (ScatterRule a, double val)
 *  particle, and so must be executed for each one.*
 **************************************************/
 void setPlot(double positions[])
-{
+{  //1
     int j,k;
     double d;
     for (j=0; j<DIMENSIONS; j++)
-    {
-           if (dims[j].scatter == 0)
-		    plot[j][0] = 1.0;
-		else
-		{
-            double effectiveCellSize = (2.0*spread)/plotSizes[j];
-
- 			double effectivePos = positions[j]*effectiveCellSize;
-			k=0;double xx=0;
-		    int ww=dims[j].scatterIndex;
-			for (d= -spread; d < spread+0.0001; d+= effectiveCellSize)
-			{
-				if (ww == 0)    // Gaussian distribution
-				   plot[j][k++] = 0.5*(erf(d+effectiveCellSize-effectivePos) - erf(d+-effectivePos));
-			    else            // Private distribution
-			       plot[j][k++]=  (scatWeight(list[ww], d+ effectiveCellSize-effectivePos)
+    {  //2
+       if (dims[j].scatter == 0)
+		  plot[j][0] = 1.0;
+	   else
+	   {  //3
+          double effectiveCellSize = (2.0*spread)/plotSizes[j];
+ 		  double effectivePos = positions[j]*effectiveCellSize;
+		  k=0;double xx=0;
+		  int ww=dims[j].scatterIndex;
+		  for (d= -spread; d < spread+0.0001; d+= effectiveCellSize)
+		  {  //4
+			if (ww == 0)    // Gaussian distribution
+			  plot[j][k++] = 0.5*(erf(d+effectiveCellSize-effectivePos) - erf(d+-effectivePos));
+			else            // Private distribution
+			  plot[j][k++]=  (scatWeight(list[ww], d+ effectiveCellSize-effectivePos)
 			                      - scatWeight(list[ww],d-effectivePos));
-		        xx+= plot[j][k-1];   // This is just a check!
-		    }
-			if (ww != 0 && (xx<0.9999 || xx > 1.0001))
-			{
-			    printf("Core #%d:Private scattering duzzent add up| xx = %lf\n", myRank, xx);
-				printf("This is not supposed to happen.\n");
-				exit(0);
-		    }
+		    xx+= plot[j][k-1];   // This is just a check!
+		  }  //4
+		  if (ww != 0 && (xx<0.9999 || xx > 1.0001))
+		  {  //4
+			 printf("Core #%d:Private scattering duzzent add up| xx = %lf\n", myRank, xx);
+			 printf("This is not supposed to happen.\n");
+			 exit(0);
+		  }  //4
 
-			// Temporary bit
-			if(ww == 0)
-			{
-				d=0.0;
-			// Apply very small correction
-			   for(k=0; k<plotSizes[j]; k++)
-			     d+= plot[j][k];
-			   for (k=0; k<plotSizes[j]; k++)
-			     plot[j][k] /= d;
-		    }
-	  }
-  }
-}
-
-
-
-
-
+		  if(ww == 0)
+		  {  //4
+			 d=0.0;
+			    // Apply very small correction to make sure area under
+			    // the curve is 1.0000...
+			 for(k=0; k<plotSizes[j]; k++)
+			    d+= plot[j][k];
+			 for (k=0; k<plotSizes[j]; k++)
+			    plot[j][k] /= d;
+		  }  //4
+	  }  //3
+  } //2
+}  //1
 
 
 /******************************************************
@@ -147,6 +150,9 @@ void setPlot(double positions[])
 *  rightTree if the key coordinate is more than the   *
 *  upper bound for that core                          *
 *  Otherwise the record goes to middleTree.           *
+*  Vot iss dummy record? This is a dummy record with  *
+*  impossible values, added to some cores to ensure   *
+*  that they all have the same number of records.     *
 ******************************************************/
 
 void processRecord(int j)
@@ -160,6 +166,12 @@ void processRecord(int j)
 	Cell cc;
 	short ww[6];
 	Element * e;
+    if (m.v[k] > 100000)
+    {  //2
+        printf("Dummy record caught\n");
+        return;
+    }   //2
+
     for (k = 0; k< 6; k++)
     {  //2
 		celads[k] = (short) floor(m.v[k]);
@@ -173,23 +185,16 @@ void processRecord(int j)
              for(d[3] = plotSizes[3]-1; d[3]>= 0; d[3]--)
                 for (d[4] =0; d[4]<plotSizes[4]; d[4]++)
                   for(d[5] = plotSizes[5]-1; d[5]>= 0; d[5]--)
-
-              { //3
-				  dweight = (m.v[6] * plot[5][d[5]]*plot[4][d[4]]*plot[3][d[3]]*plot[2][d[2]]*plot[1][d[1]]*plot[0][d[0]]);
+              { //2
+   				  dweight = (m.v[6] * plot[5][d[5]]*plot[4][d[4]]
+   				                    *plot[3][d[3]]*plot[2][d[2]]
+   				                    *plot[1][d[1]]*plot[0][d[0]]);
                   if (dweight > threshold)
                   { //3
-                        cc.charge = dweight;
- //                    printf("Core # %d: key variable: %lf\n",myRank,cc.v[key]);
+                     cc.charge = dweight;
                      for (k=0; k<6; k++)
 						 ww[k] = celads[k]-plotMidPoints[k]+d[k];
                      cc.v = map(ww);
- #ifdef DT
-                     if (myRank == 1  && j == 100)   // Special
-                     { //4
-                         fprintf(glob,"%d %d %d %d %d %d, %f\n",ww[0],ww[1],ww[2],ww[3],ww[4],ww[5],cc.charge);
-                         totwt += cc.charge;
-				     } //4
- #endif
                      if (ww[key]< lowerBoundary)
                      { //4
 						 treeBuild(&cc, &leftTree);
@@ -209,8 +214,10 @@ void processRecord(int j)
 			      } //3
 		      } //2
 	dun++;
-	if ((dun%500) == 0)
-	   printf ("Core %d has done %d records\n",myRank,dun);
+	if (dun == (localNumberOfRecords/3))
+	   printf ("Core %d has done one third of its job\n",myRank);
+	if(dun == (2*localNumberOfRecords/3))
+	   printf("Core %d has completed two thirds of the job\n",myRank);
 }
 
 
@@ -231,35 +238,31 @@ void doMacroParticles1()
     middleTree=NULL;
     leftTree=NULL;
     rightTree = NULL;
-    aa=bb=cc=dd=0;
-
-	treeCount = 0;
     char nb[100];
     // Set boundaries
-		if (myRank == 0)
-		{
-			lowerBoundary = -100;
-		    upperBoundary = coreBoundaries[1];;
-	    }
-	    else if (myRank == np-1)
-	    {
-			lowerBoundary = coreBoundaries[np-1];
-			upperBoundary = dims[key].resolution + 100;
-	    }
-	    else
-	    {
-			lowerBoundary = coreBoundaries[myRank];
-			upperBoundary = coreBoundaries[myRank+1];
-		}
+	if (myRank == 0)
+	{  //2
+		lowerBoundary = -100;
+		upperBoundary = coreBoundaries[1];;
+	}  //2
+	else if (myRank == np-1)
+	{  //2
+		lowerBoundary = coreBoundaries[np-1];
+		upperBoundary = dims[key].resolution + 100;
+	}  //2
+	else
+	{  //2
+		lowerBoundary = coreBoundaries[myRank];
+		upperBoundary = coreBoundaries[myRank+1];
+	}  //2
 
 	     // Start processing records
     left =0; middle = 0; right = 0;
 	for(j = 0; j < localNumberOfRecords; j++)
 	if(localv[j].v[0] < 999999)   // Don't pocess dummy records
 	   processRecord(j);
-}
-
-
+	printf("Core #%d left = %d, middle = %d, right = %d\n",myRank,left,middle,right);
+}  //1
 
 
 /********************************************
@@ -269,26 +272,24 @@ void doMacroParticles1()
 ********************************************/
 
 void explore (Element * h)
-{
-
+{ //1
 	if (grandom(&idum) > 0.5)
-	{
+	{  //2
 		 if (h->back != NULL)
 		    explore (h->back);
 		 inSeam[inSeamLength++] = h->cell;
 		 if (h->fore != NULL)
 		    explore (h->fore);
-    }
+    } //2
     else
- 	{
+ 	{  //2
 		 if (h->fore != NULL)
 		    explore (h->fore);
 		 inSeam[inSeamLength++] = h->cell;
 		 if (h->back != NULL)
 		    explore (h->back);
-    }
-
-}
+    }  //2
+}  //1
 
 
 /***********************************
@@ -307,67 +308,65 @@ void doMacroParticles2()
 	int j;
 	if(myRank != 0)
 	{  //2
-		// For all cores except core 0:
+		                       // For all cores except core 0:
 		if (left > 0)
 		    explore(leftTree);
-	        // Initialise outSeam when inSeam is aleady full
-            // Send length of cell table to Core (myRank-1)
-        MPI_Send(&inSeamLength,1, MPI_INT,myRank-1,0, MPI_COMM_WORLD);
+	                           // Initialise outSeam when inSeam is aleady full
+                               // Send length of cell table to Core (myRank-1)
+        MPI_Send(&inSeamLength,1, MPI_LONG,myRank-1,0, MPI_COMM_WORLD);
     }  //2
 
     if (myRank < (np-1)) // For all cores except core (np-1)
-    {
-		MPI_Recv(&outSeamLength,1,MPI_INT,myRank+1,0,MPI_COMM_WORLD,&status);
+    {  //2
+		MPI_Recv(&outSeamLength,1,MPI_LONG,myRank+1,0,MPI_COMM_WORLD,&status);
 		outSeam = &(inSeam[inSeamLength]);
-    }
+    }  //2
 
     if(myRank != 0)      // For all cores except 0: send data
-    {
+    {  //2
 		if(inSeamLength > 0)
-		{
 			MPI_Send(inSeam,inSeamLength,MPI_cell,myRank-1,0, MPI_COMM_WORLD);
-	    }
-    }
+    }  //2
 	if(myRank < (np-1))   // For all cores except cor(n-1): receive data
 	{ // 2                   // and populate the middle tree
 	     if(outSeamLength > 0)
-	     {
+	     {  //3
              MPI_Recv((void *)(outSeam),outSeamLength,MPI_cell,myRank+1, 0,MPI_COMM_WORLD,&status);
 		     for(j=0; j < outSeamLength; j++)
 		        treeBuild(outSeam+j, &middleTree);
-	     }
+	     }  //3
      }  //2
-	    // Now do it all the other way!
+	                        // Now do it all the other way!
 	inSeam = (Cell *) (mem+soFar);
 	inSeamLength = 0;
 	if(myRank < (np-1))
 	{  //2
-		// For all cores except core np-1:
+		                   // For all cores except core np-1:
 		if (right > 0)
 		    explore(rightTree);
-	        // Initialise outSeam when inSeam is aleady full
+	                       // Initialise outSeam when inSeam is aleady full
 	    outSeam = (Cell *)(inSeam + inSeamLength);
-            // Send length of cell table to Core (myRank+1)
-        MPI_Send(&inSeamLength,1, MPI_INT,myRank+1,0, MPI_COMM_WORLD);
+                           // Send length of cell table to Core (myRank+1)
+        MPI_Send(&inSeamLength,1, MPI_LONG,myRank+1,0, MPI_COMM_WORLD);
     } //2
 
-    if (myRank != 0) // For all cores except core 0)
-    {
-       MPI_Recv(&outSeamLength,1,MPI_INT,myRank-1,0,MPI_COMM_WORLD,&status);
+    if (myRank != 0)      // For all cores except core 0)
+    {  //2
+       MPI_Recv(&outSeamLength,1,MPI_LONG,myRank-1,0,MPI_COMM_WORLD,&status);
        outSeam = &(inSeam[inSeamLength]);
-    }
+    }  //2
     if(myRank < (np-1))      // For all cores except core np-1: send data
         if(inSeamLength > 0)
             MPI_Send(inSeam,inSeamLength,MPI_cell,myRank+1,0, MPI_COMM_WORLD);
 
-	if(myRank != 0)   // For all cores except core 0 receive data
+	if(myRank != 0)          // For all cores except core 0 receive data
 	 { //2                   // and populate the middle tree
 		 if (outSeamLength > 0)
-		 {
+		 {  //3
 			 MPI_Recv(outSeam,outSeamLength,MPI_cell, myRank-1,0,MPI_COMM_WORLD,&status);
 		     for(j=0; j < outSeamLength; j++)
 		        treeBuild(outSeam+j, &middleTree);
-	     }
+	     }  //3
      } //2
 }//1
 
@@ -376,67 +375,100 @@ void doMacroParticles2()
 * If the cell's charge expectation is more  *
 * than the THRESHOLD it appends the cell to *
 * inSeam.                                   *
+* Important modification made on 150904:    *
+* If noise is to be used, then the Poisson  *
+* adjustment to the charge is made here     *
+* and cells with zero charge are discarded. *
+* The coordinates are not altered at this   *
+* stage.                                    *
 ********************************************/
 
 void finalOut (Element * h)
-{
+{  //1
 	 if (h->back != NULL)
 		    finalOut (h->back);
-		 if (h->cell.charge > threshold)
-		     inSeam[inSeamLength++] = h->cell;
-		 if (h->fore != NULL)
-		    finalOut (h->fore);
-}
+	 if (!nonoise)
+	 { //2
+		 int k = poisson(h->cell.charge);
+		 if (k > 0)
+		 {  //3
+			 h->cell.charge = (double)k;
+			 inSeam[inSeamLength++] = h->cell;
+		 }  //3
+	 }  //2
+	 else
+	 if (h->cell.charge > threshold)
+		 inSeam[inSeamLength++] = h->cell;
+	 if (h->fore != NULL)
+		finalOut (h->fore);
+}  //1
+
+
+/*************************************
+* (Comment entered a bit later)      *
+* I THINK this function collects all *
+* the records in the middle tree and *
+* outputs them.                      *
+*************************************/
 
 void collectCells()
-{
+{  //1
 	inSeam = (Cell *) (mem+soFar);
 	inSeamLength = 0;
     if (middle > 0)
     finalOut(middleTree);
-}
+}  //1
+
+/***************************************
+* This is where all the work gets dun! *
+***************************************/
 
 void doMacroparticles()
-{
-   int source;
+{  //1
+   int source,kk;
+   MPI_Datatype  ptype;
    {  //2
     // Do MACROPARTICLES
        {  //3
 	   transferData();
-	   stage = 1;
 	   doMacroParticles1();
 	   MPI_Barrier(MPI_COMM_WORLD);  // Synchronise
        doMacroParticles2();
        }  //3
        totalTime += (MPI_Wtime() - startTime);
-       MPI_Barrier(MPI_COMM_WORLD);
        startTime = MPI_Wtime();
        collectCells();
        totalTime += (MPI_Wtime() - startTime);
        MPI_Barrier(MPI_COMM_WORLD);
        startTime = MPI_Wtime();
+          setRoots();
        if (myRank == 0)
        { //3
-          for(j = 0; j < inSeamLength; j++)
-		     writeRealCell(inSeam[j]);
-		  for (source = 1; source < np; source++)
-		  { //4
-		     MPI_Recv(&inSeamLength,1,MPI_INT, source,0,MPI_COMM_WORLD, &status);
-             MPI_Recv(inSeam, inSeamLength, MPI_cell, source,0,MPI_COMM_WORLD, &status);
-		     for(j = 0; j < inSeamLength; j++)
-		         writeRealCell(inSeam[j]);
-	      } //4
-	  }  //3
-	  else
-	  {  //3
-		  MPI_Send(&inSeamLength,1,MPI_INT,0,0,MPI_COMM_WORLD);
-		  MPI_Send(inSeam,inSeamLength,MPI_cell,0,0,MPI_COMM_WORLD);
-      }  //3
+           for (j=0; j<np; j++)
+              printf ("Root [%d] = %ld\n",j,ww[j]);
+       } //3
 
-      totalTime += (MPI_Wtime() - startTime);
-      MPI_Barrier(MPI_COMM_WORLD);
-      startTime = MPI_Wtime();
-	  finish = MPI_Wtime();
+       MPI_Type_contiguous (recordLength,MPI_CHAR,&ptype);
+       MPI_Type_commit (&ptype);
+	   kk = MPI_File_open(MPI_COMM_WORLD, microfile,MPI_MODE_CREATE|MPI_MODE_WRONLY,MPI_INFO_NULL,&mf);
+       if (kk != MPI_SUCCESS)
+		   handleError("MPI_File_open fails",myRank,kk);
+	   if (myRank == 0)
+	       printf("Opened microparticle file %s\n",microfile);
+	   kk=  MPI_File_set_view(mf,recordLength*root,ptype,ptype,"native",MPI_INFO_NULL);
+       if (kk != MPI_SUCCESS)
+          handleError("MPI_File_set_view fails",myRank,kk);
+       printf("Core #%d  About to start writing %ld records\n",myRank,inSeamLength);
+       for(kk = 0; kk<inSeamLength; kk++)
+             writeRealCell(inSeam[kk]);
+       printf("Core %d finished writing\n",myRank);
+       kk= MPI_File_close(&mf);
+       if (kk != MPI_SUCCESS)
+		   handleError("MPI_File_close fails",myRank,kk);
+       totalTime += (MPI_Wtime() - startTime);
+       MPI_Barrier(MPI_COMM_WORLD);
+       startTime = MPI_Wtime();
+	   finish = MPI_Wtime();
 
    }  //2
 } //1

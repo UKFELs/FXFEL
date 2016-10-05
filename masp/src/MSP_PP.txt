@@ -1,0 +1,8 @@
+&MASP
+|This is a sample parameter file for MASP
+Input='Input_File.txt', Output= 'Output_File.txt'
+X_resolution=20,X_width=2,X_scatter='GAUSSIAN'
+Y_resolution=20,Y_width=2,Y_scatter='GAUSSIAN'
+Z_resolution=1000,Z_width=2,Z_scatter='GAUSSIAN'
+/
+
