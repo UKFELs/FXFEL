@@ -113,8 +113,8 @@ print 'Lc = ',Lc
 
 number_of_bins=10
 binnumber_Z=number_of_bins   
-binnumber_X=50
-binnumber_Y=50
+binnumber_X=10
+binnumber_Y=10
 print 'Number of bins = ',number_of_bins
 
 
@@ -184,8 +184,8 @@ Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber_Z,range=((min(mA_Z)-S_factor*
 #HxHz,edges_XZ = np.histogramdd(m_Xm_Z, bins = (binnumber_X,binnumber_Z),normed=False,weights=m_WGHT)
 #HyHz,edges_YZ = np.histogramdd(m_Ym_Z, bins = (binnumber_Y,binnumber_Z),normed=False,weights=m_WGHT)
 
-HxHz,edges_XZ = np.histogramdd(m_Xm_Z, bins = (binnumber_X,binnumber_Z),range=((min(mA_X)-S_factor*size_z,max(mA_X)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
-HyHz,edges_YZ = np.histogramdd(m_Ym_Z, bins = (binnumber_Y,binnumber_Z),range=((min(mA_Y)-S_factor*size_z,max(mA_Y)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
+HxHz,edges_XZ = np.histogramdd(m_Xm_Z, bins = (binnumber_X,binnumber_Z),range=((min(mA_X)-S_factor*size_x,max(mA_X)+S_factor*size_x),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
+HyHz,edges_YZ = np.histogramdd(m_Ym_Z, bins = (binnumber_Y,binnumber_Z),range=((min(mA_Y)-S_factor*size_y,max(mA_Y)+S_factor*size_y),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
 
 
     #import matplotlib.pyplot as plt
@@ -210,10 +210,10 @@ y0_Z = Hz
 
 #t_knots_z=np.linspace(np.min(x0_Z)+0.1*z_hst_lngth,np.max(x0_Z)-0.1*z_hst_lngth,3)
 #f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z)
-#m_Z_plt=np.linspace(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z,100)
+m_Z_plt=np.linspace(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z,100)
 f_Z = interpolate.Rbf(x0_Z, y0_Z)
-#plt.plot(m_Z_plt,f_Z(m_Z_plt))
-#plt.show()
+plt.plot(m_Z_plt,f_Z(m_Z_plt))
+plt.show()
 Non_Zero_Z=float(np.count_nonzero(Hz))
 print 'Non-zero histogram values in Z = ',Non_Zero_Z
 # Convert XZ/YZ density histograms to XZ_Density/YZ_Density arrays
@@ -268,39 +268,21 @@ f_Dens_YZ=interpolate.LSQBivariateSpline(YZarr[:,0].ravel(), YZarr[:,1].ravel(),
 
 
 # Plot the density profile XZ
-PLT_X=np.linspace(min(mA_X)-S_factor*size_z,max(mA_X)+S_factor*size_z,100)
-PLT_Y=np.linspace(min(mA_Y)-S_factor*size_z,max(mA_Y)+S_factor*size_z,100)
+PLT_X=np.linspace(min(mA_X)-S_factor*size_x,max(mA_X)+S_factor*size_x,100)
+PLT_Y=np.linspace(min(mA_Y)-S_factor*size_y,max(mA_Y)+S_factor*size_y,100)
 PLT_Z=np.linspace(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z,100)
 #print f_Dens_YZ(PLT_Y, PLT_Z)
 #import matplotlib.pyplot as plt
-#plt.pcolormesh(PLT_Z, PLT_X,f_Dens_XZ(PLT_X, PLT_Z))
-#plt.show()
+plt.pcolormesh(PLT_Z, PLT_X,f_Dens_XZ(PLT_X, PLT_Z))
+plt.show()
+plt.pcolormesh(PLT_Z, PLT_Y,f_Dens_YZ(PLT_Y, PLT_Z))
+plt.show()
 # End of plot
 
-New_X=np.linspace(min(mA_X)-S_factor*size_z,max(mA_X)+S_factor*size_z,100)
-New_Y=np.linspace(min(mA_Y)-S_factor*size_z,max(mA_Y)+S_factor*size_z,100)
+New_X=np.linspace(min(mA_X)-S_factor*size_x,max(mA_X)+S_factor*size_x,100)
+New_Y=np.linspace(min(mA_Y)-S_factor*size_y,max(mA_Y)+S_factor*size_y,100)
 New_Z=np.zeros(100)
 
-
-#CDF_XZ=np.zeros(NumberOfSlices)
-#CDF_YZ=np.zeros(NumberOfSlices)
-#for slice_number in range(0,NumberOfSlices):
-#    New_Z=(slice_number*Step_Size)+np.min(m_Z)
-    
-#    Dens_XZ=f_Dens_XZ(New_X,New_Z)
-#    Dens_YZ=f_Dens_XZ(New_Y,New_Z)
-    
-#    Dens_XZ=Dens_XZ.clip(min=0)
-#    Dens_YZ=Dens_YZ.clip(min=0)   
-
-#    CDF_XZ[slice_number]=np.sum(Dens_XZ) 
-#    CDF_YZ[slice_number]=np.sum(Dens_YZ)
-
-
-#max_CDF_XZ=np.max(CDF_XZ)
-#max_CDF_YZ=np.max(CDF_YZ)
-#print 'Max CDF_XZ =',max_CDF_XZ
-#print 'Max CDF_YZ =',max_CDF_YZ
 
 
 # Initiate empty array for Z positions or particles
@@ -382,14 +364,6 @@ Full_Ne=np.zeros(Total_Number_Of_Particles)
 
 
 
-#for i in range(0,NumberOfSlices):
-#    Full_X=np.append(result[i][0],Full_X)
-#    Full_Y=np.append(result[i][1],Full_Y)
-#    Full_Z=np.append(result[i][2],Full_Z)        
-#    Full_Ne=np.append(result[i][3],Full_Ne)
-
-
-#print result
 counter=0
 for j in range(0,Num_Of_Slice_Particles):
     for i in range(0,NumberOfSlices):
