@@ -111,17 +111,17 @@ Lc=lambda_r/(4*Pi*rho)
 number_of_bins=int((size_z/Lc)*1.10)
 print 'Lc = ',Lc
 
-number_of_bins=10
+number_of_bins=50
 binnumber_Z=number_of_bins   
-binnumber_X=10
-binnumber_Y=10
+binnumber_X=50
+binnumber_Y=50
 print 'Number of bins = ',number_of_bins
 
 
 # End of bin size calculations
 #*************************************************************
-DensityFactor=10000
-SlicesMultiplyFactor=10
+DensityFactor=1000
+SlicesMultiplyFactor=20
 
 
 
@@ -174,7 +174,7 @@ m_Ym_Z=np.vstack((mA_Y.flat,mA_Z.flat)).T
 
 
 print'Binnumber X,Y,Z = ',binnumber_X,binnumber_Y,binnumber_Z
-S_factor=0.15
+S_factor=0.25
 Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber_Z,range=((min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
 
 #print Hz
@@ -235,11 +235,14 @@ for zz in range(1,len(edges_YZ[1])):
 
 
 
-NumberOfSlices=int(SlicesMultiplyFactor*((max(mA_Z)-S_factor*size_z)-(min(mA_Z)+S_factor*size_z))/(4*Pi*rho*Lc))
+NumberOfSlices=int(SlicesMultiplyFactor*((max(mA_Z)+S_factor*size_z)-(min(mA_Z)-S_factor*size_z))/(4*Pi*rho*Lc))
+print 'Number of slices = ',NumberOfSlices
+#print 'Sample size Z = ',(max(mA_Z)+S_factor*size_z)-(min(mA_Z)-S_factor*size_z)
+#print 'Sample size Z = ',(max(mA_Z))-(min(mA_Z))
 Num_Of_Slice_Particles=int(NumberOfSourceParticles*DensityFactor/NumberOfSlices)
 
 print 'Number of particles in each slice = ',Num_Of_Slice_Particles
-print 'Number of slices = ',NumberOfSlices
+
 
 
 Step_Size=(np.max(m_Z)-np.min(m_Z))/NumberOfSlices
@@ -340,7 +343,6 @@ def SliceCalculate(slice_number):
 
 import multiprocessing
 pool = multiprocessing.Pool()
-
 if __name__ == '__main__':
     result = []
 
