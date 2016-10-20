@@ -111,7 +111,7 @@ Lc=lambda_r/(4*Pi*rho)
 number_of_bins=int((size_z/Lc)*1.10)
 print 'Lc = ',Lc
 
-number_of_bins=50
+number_of_bins=10
 binnumber_Z=number_of_bins   
 binnumber_X=50
 binnumber_Y=50
@@ -120,8 +120,8 @@ print 'Number of bins = ',number_of_bins
 
 # End of bin size calculations
 #*************************************************************
-DensityFactor=1000
-SlicesMultiplyFactor=20
+DensityFactor=100
+SlicesMultiplyFactor=5
 
 
 
@@ -174,7 +174,7 @@ m_Ym_Z=np.vstack((mA_Y.flat,mA_Z.flat)).T
 
 
 print'Binnumber X,Y,Z = ',binnumber_X,binnumber_Y,binnumber_Z
-S_factor=0.25
+S_factor=0.15
 Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber_Z,range=((min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
 
 #print Hz
@@ -296,14 +296,14 @@ Slice_Ne=np.zeros(Num_Of_Slice_Particles)
 
 
 def SliceCalculate(slice_number):
-    Full_Xl=np.zeros(0)
-    Full_Yl=np.zeros(0)
-    Full_Zl=np.zeros(0)
-    Full_Nel=np.zeros(0)
+#    Full_Xl=np.zeros(0)
+#    Full_Yl=np.zeros(0)
+#    Full_Zl=np.zeros(0)
+#    Full_Nel=np.zeros(0)
     Z_Slice_Value=(slice_number*Step_Size)+np.min(m_Z)
     density_Z[:]=Z_Slice_Value
-    ProgressValue=100*((Z_Slice_Value-np.min(m_Z))/size_z)
-    print 'Completed = ',ProgressValue,' [%] ',Z_Slice_Value,' [m] \r',
+#    ProgressValue=100*((Z_Slice_Value-np.min(m_Z))/size_z)
+#    print 'Completed = ',ProgressValue,' [%] ',Z_Slice_Value,' [m] \r',
 
 # Interpolate curve density for selected slice
         
@@ -352,9 +352,9 @@ if __name__ == '__main__':
     pool.join()
 
 print np.shape(result)
+#print len(result)
 
-
-Total_Number_Of_Particles=Num_Of_Slice_Particles*NumberOfSlices
+Total_Number_Of_Particles=Num_Of_Slice_Particles*len(result)
 
 Full_X=np.zeros(Total_Number_Of_Particles)
 Full_PX=np.zeros(0)
@@ -368,7 +368,7 @@ Full_Ne=np.zeros(Total_Number_Of_Particles)
 
 counter=0
 for j in range(0,Num_Of_Slice_Particles):
-    for i in range(0,NumberOfSlices):
+    for i in range(0,len(result)):
         Full_X[counter]=result[i][0][j]
         Full_Y[counter]=result[i][1][j]
         Full_Z[counter]=result[i][2][j]
