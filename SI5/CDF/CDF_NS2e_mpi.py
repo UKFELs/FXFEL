@@ -365,10 +365,28 @@ for j in range(0,Num_Of_Slice_Particles):
         counter=counter+1
    
 # Interpolate momentum onto new macroparticles using the momentum map from initial data   
-print 'Starting to interpolate momentum data... - takes time' 
-Full_PX = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PX.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
-Full_PY = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PY.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
-Full_PZ = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PZ.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
+print 'Starting to interpolate momentum data... - takes time'
+
+def Calculate_PX(): 
+    Full_PX = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PX.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
+    return Full_PX
+def Calculate_PY():
+    Full_PY = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PY.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
+    return Full_PY
+def Calculate_PZ(): 
+    Full_PZ = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PZ.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
+    return Full_PZ
+    
+# Start three simultaneous processes for griddata interpolation
+from multiprocessing.pool import ThreadPool
+pool = ThreadPool(processes=3)
+async_result_PX = pool.apply_async(Calculate_PX, ()) 
+async_result_PY = pool.apply_async(Calculate_PY, ())
+async_result_PZ = pool.apply_async(Calculate_PZ, ())
+Full_PX = async_result_PX.get()
+Full_PY = async_result_PY.get()
+Full_PZ = async_result_PZ.get()
+# End of interpolation
 
 # Add noise
 print 'Adding noise...'
