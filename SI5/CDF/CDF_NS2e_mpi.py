@@ -107,8 +107,7 @@ omega_p=np.sqrt((e_ch*e_ch*n_p)/(e_0*m))
 rho=(1/gamma_0)*(((a_u*omega_p)/(4*c*k_u))**(2.0/3.0))
 lambda_u=(2*Pi)/k_u
 lambda_r=(lambda_u/(2*gamma_0**2))*(1+a_u**2)
-Lc=lambda_r/(4*Pi*rho)
-number_of_bins=int((size_z/Lc)*1.10)
+Lc=lambda_r/(4.0*Pi*rho)
 print 'Lc = ',Lc
 # End of inital data calculations
 
@@ -178,18 +177,13 @@ YZarr=np.zeros(((len(edges_YZ[0])-1)*(len(edges_YZ[1])-1),3))
 x0_Z = np.linspace(0.5*(edges_Z[0][0]+edges_Z[0][1]),0.5*(edges_Z[0][binnumber_Z]+edges_Z[0][binnumber_Z-1]),binnumber_Z)
 y0_Z = Hz
 
-
 # If user want to use LSQ interpolation then unhash next three lines and comment the line where RBF is used 
 #z_hst_lngth=np.max(x0_Z)-np.min(x0_Z)
 #t_knots_z=np.linspace(np.min(x0_Z)+0.1*z_hst_lngth,np.max(x0_Z)-0.1*z_hst_lngth,3)
 #f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z)
 
-
-
 # Use RBF interpolation for Z-axis, hash next lines and unhash 3 lines for LSQ interpolation above  
 f_Z = interpolate.Rbf(x0_Z, y0_Z)
-
-
 
 #****Below is just for plotting
 m_Z_plt=np.linspace(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z,100)
@@ -197,13 +191,11 @@ plt.plot(m_Z_plt,f_Z(m_Z_plt))
 plt.show()
 #****End of plotting Z axis density profile
 
-
 # Print the value of the bins with non-zero values in histogram
 # This tells us how many histogram values have charge and also informs us how many zero-values we added
 # with S_factor variable
 Non_Zero_Z=float(np.count_nonzero(Hz))
 print 'Non-zero histogram values in Z = ',Non_Zero_Z
-
 
 # Convert XZ/YZ density histograms to XZ_Density/YZ_Density arrays (move the histogram to array like: Value,X,Y,Z)
 for zz in range(1,len(edges_XZ[1])):
@@ -218,8 +210,6 @@ for zz in range(1,len(edges_YZ[1])):
     YZarr[(yy-1)+(zz-1)*(len(edges_YZ[0])-1),1]=(edges_YZ[1][zz]+edges_YZ[1][zz-1])*0.5
     YZarr[(yy-1)+(zz-1)*(len(edges_YZ[0])-1),2]=HyHz[yy-1,zz-1]
 
-
-
 # Calculate the number of slices using the SlicesMultiplyFactor and 4*Pi*rho calculated before
 # Do NOT change this line unless you want to set some number of slices not binded with 4*Pi*rho
 
@@ -229,14 +219,10 @@ print 'Number of slices = ',NumberOfSlices
 Num_Of_Slice_Particles=int(NumberOfSourceParticles*DensityFactor/NumberOfSlices)
 print 'Number of particles in each slice = ',Num_Of_Slice_Particles
 
-
 # Calculate the step size - this is just size of samples divided over number of calculated Slices
 Step_Size=(np.max(m_Z)-np.min(m_Z))/NumberOfSlices
 
-
-
 #*** INTERPOLATE XZ AND YZ PLANES USING 2D FUNCTION
-
 # Calculate the length of X,Y,Z histogram for fitting
 x_hst_lngth=np.max(XZarr[:,0])-np.min(XZarr[:,0])
 y_hst_lngth=np.max(YZarr[:,0])-np.min(YZarr[:,0])
@@ -247,7 +233,6 @@ t_XZ=np.linspace(np.min(XZarr[:,0])+0.1*z_hst_lngth,np.max(XZarr[:,0])-0.1*x_hst
 t_YZ=np.linspace(np.min(YZarr[:,0])+0.1*z_hst_lngth,np.max(YZarr[:,0])-0.1*y_hst_lngth,5)
 t_ZZ=np.linspace(np.min(XZarr[:,1])+0.1*z_hst_lngth,np.max(XZarr[:,1])-0.1*z_hst_lngth,5)
 
-
 # Interpolate using LSQBivariateSpline, hash if want to use Interp2D
 f_Dens_XZ=interpolate.LSQBivariateSpline(XZarr[:,0].ravel(), XZarr[:,1].ravel(),XZarr[:,2].ravel(),t_XZ,t_ZZ)
 f_Dens_YZ=interpolate.LSQBivariateSpline(YZarr[:,0].ravel(), YZarr[:,1].ravel(),YZarr[:,2].ravel(),t_YZ,t_ZZ)
@@ -255,7 +240,6 @@ f_Dens_YZ=interpolate.LSQBivariateSpline(YZarr[:,0].ravel(), YZarr[:,1].ravel(),
 # Interpolate using Interp2D - unhash if want to use instead of LSQ
 #f_Dens_XZ=interpolate.interp2d(XZarr[:,0].ravel(), XZarr[:,1].ravel(),XZarr[:,2].ravel())
 #f_Dens_YZ=interpolate.interp2d(YZarr[:,0].ravel(), YZarr[:,1].ravel(),YZarr[:,2].ravel())
-
 
 #*****Plot the density profile XZ,YZ
 # Create data for plot
@@ -268,13 +252,10 @@ plt.pcolormesh(PLT_Z, PLT_Y,f_Dens_YZ(PLT_Y, PLT_Z))
 plt.show()
 #*****End of plot
 
-
 # Initiate data for fitting density profile in each loop
 New_X=np.linspace(min(mA_X)-S_factor*size_x,max(mA_X)+S_factor*size_x,100)
 New_Y=np.linspace(min(mA_Y)-S_factor*size_y,max(mA_Y)+S_factor*size_y,100)
 New_Z=np.zeros(100)
-
-
 
 # Initiate empty array for Z positions or particles
 density_Z=np.zeros(Num_Of_Slice_Particles)
@@ -286,15 +267,12 @@ density_X=np.random.uniform(low=0, high=1, size=(Num_Of_Slice_Particles))
 Slice_Ne=np.zeros(Num_Of_Slice_Particles)
 
 
-
 #*** Procedure for placing electrons in each slice according to calculated CDF
 def SliceCalculate(slice_number):
-
 
 # Calculate value (in meters) of current slice
     Z_Slice_Value=(slice_number*Step_Size)+np.min(m_Z)
     density_Z[:]=Z_Slice_Value
-    
 
 # Interpolate density curev for current slice and remove values below 0
         
@@ -302,7 +280,6 @@ def SliceCalculate(slice_number):
     Dens_YZ=f_Dens_YZ(New_Y,Z_Slice_Value)
     Dens_XZ=Dens_XZ.clip(min=0)
     Dens_YZ=Dens_YZ.clip(min=0)   
-    
 
 # Check if the density is above 0, we don't want to create slices
 # with electrons charge = 0
@@ -346,7 +323,6 @@ def SliceCalculate(slice_number):
 
 #***End of procedure
 
-
 #***Start multiprocessing of 'SliceCalculate' procedure
 import multiprocessing
 pool = multiprocessing.Pool()
@@ -363,9 +339,7 @@ if __name__ == '__main__':
     
 print ' \r'  
 
-
 #Rearrange data from multiprocessing into more convenient arrays
-
 
 Total_Number_Of_Particles=Num_Of_Slice_Particles*len(result)
 print 'Total particles in set = ',Total_Number_Of_Particles
@@ -379,7 +353,6 @@ Full_Z=np.zeros(Total_Number_Of_Particles)
 Full_PZ=np.zeros(0)
 Full_Ne=np.zeros(Total_Number_Of_Particles)
 
-
 # Loopt that rearranges array 'results' into separate X,Y,Z,Ne arrays
 print 'Starting rearranging array...'
 counter=0
@@ -390,24 +363,35 @@ for j in range(0,Num_Of_Slice_Particles):
         Full_Z[counter]=result[i][2][j]
         Full_Ne[counter]=result[i][3][j]
         counter=counter+1
-
-
-
-
-    
    
 # Interpolate momentum onto new macroparticles using the momentum map from initial data   
-print 'Starting to interpolate momentum data... - takes time' 
-Full_PX = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PX.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
-Full_PY = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PY.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
-Full_PZ = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PZ.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
+print 'Starting to interpolate momentum data... - takes time'
+
+def Calculate_PX(): 
+    Full_PX = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PX.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
+    return Full_PX
+def Calculate_PY():
+    Full_PY = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PY.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
+    return Full_PY
+def Calculate_PZ(): 
+    Full_PZ = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PZ.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
+    return Full_PZ
+    
+# Start three simultaneous processes for griddata interpolation
+from multiprocessing.pool import ThreadPool
+pool = ThreadPool(processes=3)
+async_result_PX = pool.apply_async(Calculate_PX, ()) 
+async_result_PY = pool.apply_async(Calculate_PY, ())
+async_result_PZ = pool.apply_async(Calculate_PZ, ())
+Full_PX = async_result_PX.get()
+Full_PY = async_result_PY.get()
+Full_PZ = async_result_PZ.get()
+# End of interpolation
 
 # Add noise
 print 'Adding noise...'
 Rand_Z=Step_Size*(np.random.random(len(Full_Z)) - 0.5)
 Full_Z=Full_Z+(Rand_Z/np.sqrt(Full_Ne))
-
-
 
 # Open output file 
 output_file=tables.open_file(file_name_base+'_MPI.si5','w')
