@@ -284,10 +284,10 @@ for i in range(0,10):
     mmin_Y[i]=np.min(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mm_Z[i]=0.5*((minz+step*(i))+(minz+step*(i+1)))
 
-f_mmax_X=interpolate.interp1d(mm_Z,mmax_X,kind='cubic')
-f_mmin_X=interpolate.interp1d(mm_Z,mmin_X,kind='cubic')
-f_mmax_Y=interpolate.interp1d(mm_Z,mmax_Y,kind='cubic')
-f_mmin_Y=interpolate.interp1d(mm_Z,mmin_Y,kind='cubic')
+f_mmax_X=interpolate.UnivariateSpline(mm_Z,mmax_X,ext=1)
+f_mmin_X=interpolate.UnivariateSpline(mm_Z,mmin_X,ext=1)
+f_mmax_Y=interpolate.UnivariateSpline(mm_Z,mmax_Y,ext=1)
+f_mmin_Y=interpolate.UnivariateSpline(mm_Z,mmin_Y,ext=1)
 
    
 #*** Procedure for placing electrons in each slice according to calculated CDF
@@ -314,8 +314,8 @@ def SliceCalculate(slice_number):
 
 # Interpolate density curev for current slice and remove values below 0
       
-    Dens_XZ=f_Dens_XZ(New_Xl,Z_Slice_Value)
-    Dens_YZ=f_Dens_YZ(New_Yl,Z_Slice_Value)
+    Dens_XZ=f_Dens_XZ(New_X,Z_Slice_Value)
+    Dens_YZ=f_Dens_YZ(New_Y,Z_Slice_Value)
     Dens_XZ=Dens_XZ.clip(min=0)
     Dens_YZ=Dens_YZ.clip(min=0)   
 
