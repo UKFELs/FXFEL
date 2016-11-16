@@ -61,13 +61,28 @@ def elapsed():
 
 f=tables.open_file(file_name_in,'r')
 Particles=f.root.Particles.read()
-mA_X = Particles[:,0]
-mA_Y = Particles[:,2]    
-mA_Z = Particles[:,4]
-mA_PX = Particles[:,1]
-mA_PY = Particles[:,3]  
-mA_PZ = Particles[:,5]
-mA_WGHT = Particles[:,6]
+
+#Filter the particles with z values
+z_low=48.79909
+z_high=48.79911
+
+mA_X=Particles[:,0][(Particles[:,4]>=z_low) & (Particles[:,4]<z_high)]
+mA_Y=Particles[:,2][(Particles[:,4]>=z_low) & (Particles[:,4]<z_high)]
+mA_Z=Particles[:,4][(Particles[:,4]>=z_low) & (Particles[:,4]<z_high)]
+mA_PX=Particles[:,1][(Particles[:,4]>=z_low) & (Particles[:,4]<z_high)]
+mA_PY=Particles[:,3][(Particles[:,4]>=z_low) & (Particles[:,4]<z_high)]
+mA_PZ=Particles[:,5][(Particles[:,4]>=z_low) & (Particles[:,4]<z_high)]
+mA_WGHT=Particles[:,6][(Particles[:,4]>=z_low) & (Particles[:,4]<z_high)]
+
+
+
+#mA_X = Particles[:,0]
+#mA_Y = Particles[:,2]    
+#mA_Z = Particles[:,4]
+#mA_PX = Particles[:,1]
+#mA_PY = Particles[:,3]  
+#mA_PZ = Particles[:,5]
+#mA_WGHT = Particles[:,6]
 
 
 
@@ -82,7 +97,7 @@ c=3.0e+8                    # Speed of light
 m=9.11e-31                  # mass of electron
 e_0=8.854E-12               # charge of electron
 DensityFactor=1000          # Density factor i.e multiplier for number of particles
-SlicesMultiplyFactor=1  # How many layers of particles is desired for 4*Pi*Rho
+SlicesMultiplyFactor=5  # How many layers of particles is desired for 4*Pi*Rho
 #*************************************************************
 
 # The below section calculate some initial data - 4*Pi*Rho is the one mose desired
@@ -116,7 +131,7 @@ print 'Lc = ',Lc
 # This is to be user modified as the values strongly influence the data
 # Especially when density profile is not smooth
 
-binnumber_Z=50   
+binnumber_Z=10   
 binnumber_X=50
 binnumber_Y=50
 print'Binnumber X,Y,Z = ',binnumber_X,binnumber_Y,binnumber_Z
@@ -155,7 +170,7 @@ m_Ym_Z=np.vstack((mA_Y.flat,mA_Z.flat)).T
 # Set the factor to extend histogram with ZERO values to smoothen the edges. Set to 0 if not needed.
 # The value of 0.15 means that the histogram will grow 30% in each direction (from -1.30*size to +1.13*size)
 
-S_factor=0.15
+S_factor=0.0
 
 # Create histogram for Z direction and stretch it using S_factor
 Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber_Z,range=((min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
@@ -184,7 +199,7 @@ y0_Z = Hz
 
 # Use RBF interpolation for Z-axis, hash next lines and unhash 3 lines for LSQ interpolation above  
 f_Z = interpolate.Rbf(x0_Z, y0_Z)
-f_Z = interpolate.interp1d(x0_Z, y0_Z,fill_value='extrapolate')
+#f_Z = interpolate.interp1d(x0_Z, y0_Z,fill_value='extrapolate')
 #****Below is just for plotting
 m_Z_plt=np.linspace(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z,100)
 plt.plot(m_Z_plt,f_Z(m_Z_plt))
@@ -213,6 +228,9 @@ for zz in range(1,len(edges_YZ[1])):
 # Calculate the number of slices using the SlicesMultiplyFactor and 4*Pi*rho calculated before
 # Do NOT change this line unless you want to set some number of slices not binded with 4*Pi*rho
 
+print 'min z =',(min(mA_Z)-S_factor*size_z)
+print 'max z =',(max(mA_Z)+S_factor*size_z)
+
 NumberOfSlices=int(SlicesMultiplyFactor*((max(mA_Z)+S_factor*size_z)-(min(mA_Z)-S_factor*size_z))/(4*Pi*rho*Lc))
 print 'Number of slices = ',NumberOfSlices
 
@@ -220,7 +238,9 @@ Num_Of_Slice_Particles=int(NumberOfSourceParticles*DensityFactor/NumberOfSlices)
 print 'Number of particles in each slice = ',Num_Of_Slice_Particles
 
 # Calculate the step size - this is just size of samples divided over number of calculated Slices
-Step_Size=(np.max(m_Z)-np.min(m_Z))/NumberOfSlices
+Step_Size=((max(mA_Z)+S_factor*size_z)-(min(mA_Z)-S_factor*size_z))/NumberOfSlices
+
+#Step_Size=(np.max(m_Z)-np.min(m_Z))/NumberOfSlices
 
 #*** INTERPOLATE XZ AND YZ PLANES USING 2D FUNCTION
 # Calculate the length of X,Y,Z histogram for fitting
@@ -303,7 +323,7 @@ OldMax_Y=max(New_Y)
 def SliceCalculate(slice_number):
 
 # Calculate value (in meters) of current slice
-    Z_Slice_Value=(slice_number*Step_Size)+np.min(m_Z)
+    Z_Slice_Value=(slice_number*Step_Size)+(np.min(m_Z)-S_factor*size_z)
     density_Z[:]=Z_Slice_Value
 
 # Scale the range of new particles to new particles set (keep the new particles within original shape of beam)
@@ -342,8 +362,8 @@ def SliceCalculate(slice_number):
         xx_0_YZ=np.linspace(np.min(New_Yl),np.max(New_Yl),len(cumulative_nq_YZ))
 
 # Create CDF interpolation function using  UnivariateSpline 
-        ff_XZ = interpolate.UnivariateSpline(cumulative_nq_XZ, xx_0_XZ,ext=3)
-        ff_YZ = interpolate.UnivariateSpline(cumulative_nq_YZ, xx_0_YZ,ext=3)
+        ff_XZ = interpolate.UnivariateSpline(cumulative_nq_XZ, xx_0_XZ,ext=1)
+        ff_YZ = interpolate.UnivariateSpline(cumulative_nq_YZ, xx_0_YZ,ext=1)
         
 # Calculate the charge for current slice taking into account that there were some
 # slices with charge 0 added by using S_factor        
@@ -432,7 +452,7 @@ Rand_Z=Step_Size*(np.random.random(len(Full_Z)) - 0.5)
 Full_Z=Full_Z+(Rand_Z/np.sqrt(Full_Ne))
 
 # Open output file 
-output_file=tables.open_file(file_name_base+'_MPI.si5','w')
+output_file=tables.open_file(file_name_base+'_MPIg.si5','w')
 
 # Merge all data into one array
 x_px_y_py_z_pz_NE = np.vstack([Full_X.flat,Full_PX.flat,Full_Y.flat,Full_PY.flat,Full_Z.flat,Full_PZ.flat,Full_Ne.flat]).T
