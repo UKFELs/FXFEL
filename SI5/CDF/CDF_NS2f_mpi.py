@@ -81,8 +81,8 @@ a_u=0.71572                 # undulator parameter ? a_u=a_w
 c=3.0e+8                    # Speed of light
 m=9.11e-31                  # mass of electron
 e_0=8.854E-12               # charge of electron
-DensityFactor=1000          # Density factor i.e multiplier for number of particles
-SlicesMultiplyFactor=1  # How many layers of particles is desired for 4*Pi*Rho
+DensityFactor=100          # Density factor i.e multiplier for number of particles
+SlicesMultiplyFactor=5  # How many layers of particles is desired for 4*Pi*Rho
 #*************************************************************
 
 # The below section calculate some initial data - 4*Pi*Rho is the one mose desired
@@ -139,8 +139,9 @@ m_Z=xyzW[:,2].flat
 m_WGHT=xyzW[:,3].flat
 NumberOfSourceParticles=len(m_X)
 
+TotalChargeOfInitialParticles=TotalNumberOfElectrons*e_ch
 # Print some user useful informations
-print 'Initial charge of particles = ',TotalNumberOfElectrons*e_ch
+print 'Initial charge of particles = ',TotalChargeOfInitialParticles
 print 'Total number of electrons: ',TotalNumberOfElectrons
 print 'Number of source macroparticles: ',len(m_X)
 print 'Electrons/macroparticles in source data:',round(TotalNumberOfElectrons/len(m_X))
@@ -155,7 +156,7 @@ m_Ym_Z=np.vstack((mA_Y.flat,mA_Z.flat)).T
 # Set the factor to extend histogram with ZERO values to smoothen the edges. Set to 0 if not needed.
 # The value of 0.15 means that the histogram will grow 30% in each direction (from -1.30*size to +1.13*size)
 
-S_factor=0.15
+S_factor=0.00
 
 # Create histogram for Z direction and stretch it using S_factor
 Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber_Z,range=((min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
@@ -303,7 +304,7 @@ OldMax_Y=max(New_Y)
 def SliceCalculate(slice_number):
 
 # Calculate value (in meters) of current slice
-    Z_Slice_Value=(slice_number*Step_Size)+np.min(m_Z)
+    Z_Slice_Value=(slice_number*Step_Size)+(np.min(m_Z)-S_factor*size_z)
     density_Z[:]=Z_Slice_Value
 
 # Scale the range of new particles to new particles set (keep the new particles within original shape of beam)
@@ -436,8 +437,13 @@ output_file=tables.open_file(file_name_base+'_MPI.si5','w')
 
 # Merge all data into one array
 x_px_y_py_z_pz_NE = np.vstack([Full_X.flat,Full_PX.flat,Full_Y.flat,Full_PY.flat,Full_Z.flat,Full_PZ.flat,Full_Ne.flat]).T
+# Calculate particle charge scale factor (due to extensions by S_factor some charge is 'stretched')
+
+ChargeScaleFactor=TotalChargeOfInitialParticles/np.sum(x_px_y_py_z_pz_NE[:,6]*e_ch)
+x_px_y_py_z_pz_NE[:,6]=x_px_y_py_z_pz_NE[:,6]*ChargeScaleFactor
 
 print 'Final charge of particles = ',np.sum(x_px_y_py_z_pz_NE[:,6]*e_ch)  
+print 'Charge scale factor = ',ChargeScaleFactor
 print 'Saving the output to files...'
 
 # Create Group in HDF5 and add metadata for Visit
