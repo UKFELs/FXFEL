@@ -170,7 +170,7 @@ m_Ym_Z=np.vstack((mA_Y.flat,mA_Z.flat)).T
 # Set the factor to extend histogram with ZERO values to smoothen the edges. Set to 0 if not needed.
 # The value of 0.15 means that the histogram will grow 30% in each direction (from -1.30*size to +1.13*size)
 
-S_factor=0.0
+S_factor=0.15
 
 # Create histogram for Z direction and stretch it using S_factor
 Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber_Z,range=((min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
@@ -199,7 +199,7 @@ y0_Z = Hz
 
 # Use RBF interpolation for Z-axis, hash next lines and unhash 3 lines for LSQ interpolation above  
 f_Z = interpolate.Rbf(x0_Z, y0_Z)
-#f_Z = interpolate.interp1d(x0_Z, y0_Z,fill_value='extrapolate')
+
 #****Below is just for plotting
 m_Z_plt=np.linspace(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z,100)
 plt.plot(m_Z_plt,f_Z(m_Z_plt))
@@ -289,15 +289,15 @@ Slice_Ne=np.zeros(Num_Of_Slice_Particles)
 # Calculate the min/max values for x/y along z-axis (outer shape)
 minz=np.min(mA_Z)
 maxz=np.max(mA_Z)
-step=(maxz-minz)/100
-mmax_X=np.zeros(100)
-mmin_X=np.zeros(100)
-mmax_Y=np.zeros(100)
-mmin_Y=np.zeros(100)
-mm_Z=np.zeros(100)
+step=(maxz-minz)/20
+mmax_X=np.zeros(20)
+mmin_X=np.zeros(20)
+mmax_Y=np.zeros(20)
+mmin_Y=np.zeros(20)
+mm_Z=np.zeros(20)
 
 # Create interpolated function which describes outer boundaries of initial electron beam
-for i in range(0,100):
+for i in range(0,20):
     mmax_X[i]=np.max(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmin_X[i]=np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmax_Y[i]=np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
@@ -362,8 +362,8 @@ def SliceCalculate(slice_number):
         xx_0_YZ=np.linspace(np.min(New_Yl),np.max(New_Yl),len(cumulative_nq_YZ))
 
 # Create CDF interpolation function using  UnivariateSpline 
-        ff_XZ = interpolate.UnivariateSpline(cumulative_nq_XZ, xx_0_XZ,ext=1)
-        ff_YZ = interpolate.UnivariateSpline(cumulative_nq_YZ, xx_0_YZ,ext=1)
+        ff_XZ = interpolate.UnivariateSpline(cumulative_nq_XZ, xx_0_XZ,ext=3)
+        ff_YZ = interpolate.UnivariateSpline(cumulative_nq_YZ, xx_0_YZ,ext=3)
         
 # Calculate the charge for current slice taking into account that there were some
 # slices with charge 0 added by using S_factor        
