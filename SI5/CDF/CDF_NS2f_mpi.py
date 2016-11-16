@@ -82,7 +82,7 @@ c=3.0e+8                    # Speed of light
 m=9.11e-31                  # mass of electron
 e_0=8.854E-12               # charge of electron
 DensityFactor=1000          # Density factor i.e multiplier for number of particles
-SlicesMultiplyFactor=5     # How many layers of particles is desired for 4*Pi*Rho
+SlicesMultiplyFactor=1  # How many layers of particles is desired for 4*Pi*Rho
 #*************************************************************
 
 # The below section calculate some initial data - 4*Pi*Rho is the one mose desired
@@ -184,7 +184,7 @@ y0_Z = Hz
 
 # Use RBF interpolation for Z-axis, hash next lines and unhash 3 lines for LSQ interpolation above  
 f_Z = interpolate.Rbf(x0_Z, y0_Z)
-
+f_Z = interpolate.interp1d(x0_Z, y0_Z,fill_value='extrapolate')
 #****Below is just for plotting
 m_Z_plt=np.linspace(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z,100)
 plt.plot(m_Z_plt,f_Z(m_Z_plt))
@@ -269,25 +269,25 @@ Slice_Ne=np.zeros(Num_Of_Slice_Particles)
 # Calculate the min/max values for x/y along z-axis (outer shape)
 minz=np.min(mA_Z)
 maxz=np.max(mA_Z)
-step=(maxz-minz)/10
-mmax_X=np.zeros(10)
-mmin_X=np.zeros(10)
-mmax_Y=np.zeros(10)
-mmin_Y=np.zeros(10)
-mm_Z=np.zeros(10)
+step=(maxz-minz)/100
+mmax_X=np.zeros(100)
+mmin_X=np.zeros(100)
+mmax_Y=np.zeros(100)
+mmin_Y=np.zeros(100)
+mm_Z=np.zeros(100)
 
 # Create interpolated function which describes outer boundaries of initial electron beam
-for i in range(0,10):
+for i in range(0,100):
     mmax_X[i]=np.max(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmin_X[i]=np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmax_Y[i]=np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmin_Y[i]=np.min(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mm_Z[i]=0.5*((minz+step*(i))+(minz+step*(i+1)))
 
-f_mmax_X=interpolate.UnivariateSpline(mm_Z,mmax_X,ext=1)
-f_mmin_X=interpolate.UnivariateSpline(mm_Z,mmin_X,ext=1)
-f_mmax_Y=interpolate.UnivariateSpline(mm_Z,mmax_Y,ext=1)
-f_mmin_Y=interpolate.UnivariateSpline(mm_Z,mmin_Y,ext=1)
+f_mmax_X=interpolate.UnivariateSpline(mm_Z,mmax_X,ext=3)
+f_mmin_X=interpolate.UnivariateSpline(mm_Z,mmin_X,ext=3)
+f_mmax_Y=interpolate.UnivariateSpline(mm_Z,mmax_Y,ext=3)
+f_mmin_Y=interpolate.UnivariateSpline(mm_Z,mmin_Y,ext=3)
 
    
 #*** Procedure for placing electrons in each slice according to calculated CDF
@@ -342,8 +342,8 @@ def SliceCalculate(slice_number):
         xx_0_YZ=np.linspace(np.min(New_Yl),np.max(New_Yl),len(cumulative_nq_YZ))
 
 # Create CDF interpolation function using  UnivariateSpline 
-        ff_XZ = interpolate.UnivariateSpline(cumulative_nq_XZ, xx_0_XZ,ext=1)
-        ff_YZ = interpolate.UnivariateSpline(cumulative_nq_YZ, xx_0_YZ,ext=1)
+        ff_XZ = interpolate.UnivariateSpline(cumulative_nq_XZ, xx_0_XZ,ext=3)
+        ff_YZ = interpolate.UnivariateSpline(cumulative_nq_YZ, xx_0_YZ,ext=3)
         
 # Calculate the charge for current slice taking into account that there were some
 # slices with charge 0 added by using S_factor        
