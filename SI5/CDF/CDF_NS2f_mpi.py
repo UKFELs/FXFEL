@@ -220,7 +220,7 @@ Num_Of_Slice_Particles=int(NumberOfSourceParticles*DensityFactor/NumberOfSlices)
 print 'Number of particles in each slice = ',Num_Of_Slice_Particles
 
 # Calculate the step size - this is just size of samples divided over number of calculated Slices
-Step_Size=(np.max(m_Z)-np.min(m_Z))/NumberOfSlices
+Step_Size=((max(mA_Z)+S_factor*size_z)-(min(mA_Z)-S_factor*size_z))/NumberOfSlices
 
 #*** INTERPOLATE XZ AND YZ PLANES USING 2D FUNCTION
 # Calculate the length of X,Y,Z histogram for fitting
@@ -269,15 +269,15 @@ Slice_Ne=np.zeros(Num_Of_Slice_Particles)
 # Calculate the min/max values for x/y along z-axis (outer shape)
 minz=np.min(mA_Z)
 maxz=np.max(mA_Z)
-step=(maxz-minz)/100
-mmax_X=np.zeros(100)
-mmin_X=np.zeros(100)
-mmax_Y=np.zeros(100)
-mmin_Y=np.zeros(100)
-mm_Z=np.zeros(100)
+step=(maxz-minz)/20
+mmax_X=np.zeros(20)
+mmin_X=np.zeros(20)
+mmax_Y=np.zeros(20)
+mmin_Y=np.zeros(20)
+mm_Z=np.zeros(20)
 
 # Create interpolated function which describes outer boundaries of initial electron beam
-for i in range(0,100):
+for i in range(0,20):
     mmax_X[i]=np.max(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmin_X[i]=np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmax_Y[i]=np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
