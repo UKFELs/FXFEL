@@ -96,8 +96,8 @@ a_u=0.71572                 # undulator parameter ? a_u=a_w
 c=3.0e+8                    # Speed of light
 m=9.11e-31                  # mass of electron
 e_0=8.854E-12               # charge of electron
-DensityFactor=1000          # Density factor i.e multiplier for number of particles
-SlicesMultiplyFactor=5  # How many layers of particles is desired for 4*Pi*Rho
+DensityFactor=4000          # Density factor i.e multiplier for number of particles
+SlicesMultiplyFactor=20  # How many layers of particles is desired for 4*Pi*Rho
 #*************************************************************
 
 # The below section calculate some initial data - 4*Pi*Rho is the one mose desired
@@ -170,7 +170,7 @@ m_Ym_Z=np.vstack((mA_Y.flat,mA_Z.flat)).T
 # Set the factor to extend histogram with ZERO values to smoothen the edges. Set to 0 if not needed.
 # The value of 0.15 means that the histogram will grow 30% in each direction (from -1.30*size to +1.13*size)
 
-S_factor=0.15
+S_factor=0.25
 
 # Create histogram for Z direction and stretch it using S_factor
 Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber_Z,range=((min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
@@ -289,15 +289,15 @@ Slice_Ne=np.zeros(Num_Of_Slice_Particles)
 # Calculate the min/max values for x/y along z-axis (outer shape)
 minz=np.min(mA_Z)
 maxz=np.max(mA_Z)
-step=(maxz-minz)/20
-mmax_X=np.zeros(20)
-mmin_X=np.zeros(20)
-mmax_Y=np.zeros(20)
-mmin_Y=np.zeros(20)
-mm_Z=np.zeros(20)
+step=(maxz-minz)/100
+mmax_X=np.zeros(100)
+mmin_X=np.zeros(100)
+mmax_Y=np.zeros(100)
+mmin_Y=np.zeros(100)
+mm_Z=np.zeros(100)
 
 # Create interpolated function which describes outer boundaries of initial electron beam
-for i in range(0,20):
+for i in range(0,100):
     mmax_X[i]=np.max(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmin_X[i]=np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmax_Y[i]=np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
