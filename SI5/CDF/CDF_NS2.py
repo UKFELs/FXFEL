@@ -329,7 +329,7 @@ for slice_number in range(0,NumberOfSlices):
    # Charge in slice
         slice_counter=slice_counter+1
         Slice_Ne[:]=(f_Z(slice_counter*Step_Size+np.min(m_Z)))/SlicesMultiplyFactor        
-        if (np.sum(Slice_Ne))>=0:        
+        if (np.sum(Slice_Ne))>0:        
         #Slice_Ne[:]=(f_Z(slice_number*Step_Size+np.min(m_Z)))/SlicesMultiplyFactor
 #           Slice_Ne[:]=1.0
             Full_X=np.append(ff_XZ(density_X),Full_X)
