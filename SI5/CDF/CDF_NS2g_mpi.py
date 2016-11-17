@@ -66,6 +66,9 @@ Particles=f.root.Particles.read()
 z_low=48.79909
 z_high=48.79911
 
+#z_low=-100
+#z_high=100
+
 mA_X=Particles[:,0][(Particles[:,4]>=z_low) & (Particles[:,4]<z_high)]
 mA_Y=Particles[:,2][(Particles[:,4]>=z_low) & (Particles[:,4]<z_high)]
 mA_Z=Particles[:,4][(Particles[:,4]>=z_low) & (Particles[:,4]<z_high)]
@@ -153,9 +156,9 @@ m_Y=xyzW[:,1].flat
 m_Z=xyzW[:,2].flat
 m_WGHT=xyzW[:,3].flat
 NumberOfSourceParticles=len(m_X)
-
+InitialParticleCharge=TotalNumberOfElectrons*e_ch
 # Print some user useful informations
-print 'Initial charge of particles = ',TotalNumberOfElectrons*e_ch
+print 'Initial charge of particles = ',InitialParticleCharge
 print 'Total number of electrons: ',TotalNumberOfElectrons
 print 'Number of source macroparticles: ',len(m_X)
 print 'Electrons/macroparticles in source data:',round(TotalNumberOfElectrons/len(m_X))
@@ -170,7 +173,7 @@ m_Ym_Z=np.vstack((mA_Y.flat,mA_Z.flat)).T
 # Set the factor to extend histogram with ZERO values to smoothen the edges. Set to 0 if not needed.
 # The value of 0.15 means that the histogram will grow 30% in each direction (from -1.30*size to +1.13*size)
 
-S_factor=0.25
+S_factor=0.20
 
 # Create histogram for Z direction and stretch it using S_factor
 Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber_Z,range=((min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
@@ -456,6 +459,12 @@ output_file=tables.open_file(file_name_base+'_MPIg.si5','w')
 
 # Merge all data into one array
 x_px_y_py_z_pz_NE = np.vstack([Full_X.flat,Full_PX.flat,Full_Y.flat,Full_PY.flat,Full_Z.flat,Full_PZ.flat,Full_Ne.flat]).T
+
+# Rescale the charge of new particle set (needed due to S_factor usage)
+ChargeFactor=InitialParticleCharge/np.sum(x_px_y_py_z_pz_NE[:,6]*e_ch)
+print 'Charge scaling factor = ',ChargeFactor
+x_px_y_py_z_pz_NE[:,6]=x_px_y_py_z_pz_NE[:,6]*ChargeFactor
+
 
 print 'Final charge of particles = ',np.sum(x_px_y_py_z_pz_NE[:,6]*e_ch)  
 print 'Saving the output to files...'
