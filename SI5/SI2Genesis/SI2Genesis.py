@@ -44,7 +44,7 @@ out.write('# Input Distribution from '+str(file_name_in)+"\n")
 out.write('? VERSION = 1.0'+"\n")
 out.write('? CHARGE = '+str(np.sum(Electrons[:,6]*e_ch))+"\n")
 out.write('? SIZE = '+str(n)+"\n")
-out.write('? COLUMNS X PX Y PY T P'+"\n")
+out.write('? COLUMNS X PX Y PY Z P'+"\n")
 
 
 for i in range(n):                                  
