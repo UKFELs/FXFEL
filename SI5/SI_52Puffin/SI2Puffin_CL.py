@@ -86,7 +86,11 @@ rho=(1/gamma_0)*(((a_u*omega_p)/(4*c*k_u))**(2.0/3.0))
 rho = 0.0050
 
 lambda_u=(2*Pi)/k_u
-lambda_r=(lambda_u/(2*gamma_0**2))*(1+a_u**2)
+
+# Calculated for planar undulator -> (1+(a^2)/2)
+lambda_r=(lambda_u/(2.0*gamma_0**2.0))*(1+(a_u**2.0)/2.0)
+
+#lambda_r=(lambda_u/(2*gamma_0**2))*(1+a_u**2)
 
 print 'Rho= ', rho
 print 'Lambda_u= ',lambda_u

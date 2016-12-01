@@ -94,26 +94,31 @@ rho=(1/gamma_0)*(((a_u*omega_p)/(4*c*k_u))**(2.0/3.0))
 
 #Temporary change of rho to rho = 0.005
 rho = 0.0050
+gamma_0=456.40
+lambda_u=(2.0*Pi)/k_u
 
-lambda_u=(2*Pi)/k_u
-lambda_r=(lambda_u/(2*gamma_0**2))*(1+a_u**2)
+# Calculated for planar undulator -> (1+(a^2)/2)
+lambda_r=(lambda_u/(2.0*gamma_0**2.0))*(1+(a_u**2.0)/2.0)
 
 print 'Rho= ', rho
 print 'Lambda_u= ',lambda_u
 print 'Lambda_r= ',lambda_r
 
+
+#Lc=1.3196758053191657E-6
 Lc=lambda_r/(4*Pi*rho)
 Lg=lambda_u/(4*Pi*rho)
 
 print 'Lg= ',Lg
 print 'Lc= ',Lc
-print '4*Pi*Rho= ',4*Pi*rho
+print '4*Pi*Rho= ',4.0*Pi*rho
 
 given_rho=0.005
-n_peak=(e_0*m/(e_ch**2.0))*(((given_rho*gamma_0)**(3.0/2.0)*(4.0*c*k_u))/a_u)**2.0
+n_peak=(e_0*m/(e_ch**2.0))*((given_rho*gamma_0)**3.0)*((4.0*c*k_u)/a_u)**2.0
+#n_peak1=((e_0*m)/(e_ch**2.0))*((given_rho*gamma_0)**3.0)*(4.0*c*2.0*Pi/(lambda_u*a_u))**2.0
 print 'Peak density = ',n_p
 print 'Calculated n_peak from rho = ',n_peak
-scaled_n_peak=n_peak*Lg*Lc**2.0
+scaled_n_peak=n_peak*Lg*(Lc**2.0)
 print 'Scaled n_peak = ',scaled_n_peak
 # Puffin output arrays:
 z2=m_Z/Lc
@@ -176,19 +181,20 @@ ParticleGroup._v_attrs.vsLabels='x_bar,y_bar,z2,px_bar,py_bar,gamma,Ne'
 #Close the file
 output_file.close()
 
+m_Arr[:,6]=m_Arr[:,6]*scaled_n_peak
 #print 'Creating txt output file...'
 #out_txt=open(file_name_base+'_Puffin.txt','w')
-#
+##
 #n=len(m_Arr)
-#
+##
 #out_txt.write('__[x_bar]_______[y_bar]_______[px_bar]______[py_bar]_____ [Gamma]________[Z2]__________[Ne]_____'+'\n')
 #for i in range(n): 
 #        out_txt.write(      "%.6e" %(m_Arr[i,0]) + \
 #                            " % .6e" %(m_Arr[i,1]) + \
-#                            " % .6e" %(m_Arr[i,2]) + \
 #                            " % .6e" %(m_Arr[i,3]) + \
 #                            " % .6e" %(m_Arr[i,4]) + \
 #                            " % .6e" %(m_Arr[i,5]) + \
+#                            " % .6e" %(m_Arr[i,2]) + \
 #                            " % .6e" %(m_Arr[i,6]) + "\n")
 #out_txt.close()
 #del m_Arr
