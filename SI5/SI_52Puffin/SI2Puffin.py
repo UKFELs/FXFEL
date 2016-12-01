@@ -101,7 +101,7 @@ z2=z2-min_z2+0.01
 x_bar=m_X[:]/(np.sqrt(Lg*Lc))
 y_bar=m_Y[:]/(np.sqrt(Lg*Lc))
 px_bar=m_PX[:]/(m*c*a_u)
-py_bar=m_PY[:]/(m*c*a_u)
+py_bar=-1.0*m_PY[:]/(m*c*a_u)
 #sig_gamma_tot
 #sig_px_bar
 #sig_py_bar
