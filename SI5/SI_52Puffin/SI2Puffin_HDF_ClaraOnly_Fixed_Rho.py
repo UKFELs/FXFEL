@@ -150,7 +150,7 @@ del m_X, m_PX, m_Y, m_PY, m_Z, m_PZ, m_WGHT,p_tot
 gc.collect()
 
 # Combine all read arrays into one
-m_Arr=np.vstack((x_bar,y_bar,px_bar,py_bar,gamma/gamma_0,z2,Ne)).T
+m_Arr=np.vstack((x_bar,y_bar,z2,px_bar,py_bar,gamma/gamma_0,Ne)).T
 
 del x_bar,y_bar,px_bar,py_bar,gamma,z2,Ne
 gc.collect()
@@ -158,7 +158,7 @@ gc.collect()
 output_file=tables.open_file(file_name_base+'_Puffin.hdf','w')
 # Create hdf5 file
 
-print 'Max Z2 value = ',np.max(m_Arr[:,5])
+print 'Max Z2 value = ',np.max(m_Arr[:,2])
 # Save the array into hdf5 file
 ParticleGroup=output_file.create_array('/','electrons', m_Arr)
 
@@ -172,7 +172,7 @@ ParticleGroup._v_attrs.vsType='variableWithMesh'
 ParticleGroup._v_attrs.vsTimeGroup='time'
 ParticleGroup._v_attrs.vsNumSpatialDims = 3
 ParticleGroup._v_attrs.vsLimits='globalGridGlobalLimits'
-ParticleGroup._v_attrs.vsLabels='x_bar,y_bar,px_bar,py_bar,gamma,z2,Ne'
+ParticleGroup._v_attrs.vsLabels='x_bar,y_bar,z2,px_bar,py_bar,gamma,Ne'
 #Close the file
 output_file.close()
 
