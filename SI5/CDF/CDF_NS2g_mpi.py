@@ -124,7 +124,10 @@ gamma_0=np.mean(gamma)
 omega_p=np.sqrt((e_ch*e_ch*n_p)/(e_0*m))
 rho=(1/gamma_0)*(((a_u*omega_p)/(4*c*k_u))**(2.0/3.0))
 lambda_u=(2*Pi)/k_u
-lambda_r=(lambda_u/(2*gamma_0**2))*(1+a_u**2)
+
+# Calculated for planar undulator -> (1+(a^2)/2)
+lambda_r=(lambda_u/(2.0*gamma_0**2.0))*(1+(a_u**2.0)/2.0)
+#lambda_r=(lambda_u/(2*gamma_0**2))*(1+a_u**2)
 Lc=lambda_r/(4.0*Pi*rho)
 print 'Lc = ',Lc
 # End of inital data calculations
