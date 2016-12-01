@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 """
+# WARNING !!#
+# THIS SCRIPT IS FOR USE ONLY FOR CLARA AIMED BEAMS WITH FIXED RHO = 0.005
+# REQUIRES TWO FILES TO WORK - ADVANCED USERS ONLY !!
+# USE THE SCRIPT FOR BEAMS AFTER MATCHING AND CONVERTING THEM FROM SDDS TO SI5/HDF
+
 Created on Tue Oct 13 17:03:14 2015
 
 @author: piotrt
@@ -20,6 +25,10 @@ else:
    sys.exit(1)  
 file_name_base  = (file_name_in.split('.')[0]).strip()
 
+# Below line is used to pull charges from original file and not from Elegant source
+# where all charges are equal and thus faulty. 
+f_help=tables.open_file('0_PF.si5','r')
+Charges=f_help.root.Particles.read()
 
 f=tables.open_file(file_name_in,'r')
 Electrons=f.root.Particles.read()
@@ -32,7 +41,8 @@ m_Y = Electrons[:,2]
 m_PY = Electrons[:,3]
 m_Z = Electrons[:,4]
 m_PZ = Electrons[:,5]
-m_WGHT = Electrons[:,6]
+#m_WGHT = Electrons[:,6]
+m_WGHT = Charges[:,6]
 
 del Electrons
 gc.collect()
@@ -83,7 +93,7 @@ print 'Gamma= ',gamma_0
 rho=(1/gamma_0)*(((a_u*omega_p)/(4*c*k_u))**(2.0/3.0))
 
 #Temporary change of rho to rho = 0.005
-#rho = 0.0050
+rho = 0.0050
 
 lambda_u=(2*Pi)/k_u
 lambda_r=(lambda_u/(2*gamma_0**2))*(1+a_u**2)
@@ -99,10 +109,7 @@ print 'Lg= ',Lg
 print 'Lc= ',Lc
 print '4*Pi*Rho= ',4*Pi*rho
 
-# The below line allow user to force different value of rho than calculated
-# for purpose of electrons_weight scaling in HDF files in Puffin.
-# given_rho=0.005
-given_rho=rho
+given_rho=0.005
 n_peak=(e_0*m/(e_ch**2.0))*(((given_rho*gamma_0)**(3.0/2.0)*(4.0*c*k_u))/a_u)**2.0
 print 'Peak density = ',n_p
 print 'Calculated n_peak from rho = ',n_peak
