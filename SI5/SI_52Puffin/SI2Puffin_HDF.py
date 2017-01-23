@@ -105,12 +105,12 @@ print '4*Pi*Rho= ',4*Pi*rho
 # The below line allow user to force different value of rho than calculated
 # for purpose of electrons_weight scaling in HDF files in Puffin.
 # given_rho=0.005
-given_rho=rho
-n_peak=(e_0*m/(e_ch**2.0))*(((given_rho*gamma_0)**(3.0/2.0)*(4.0*c*k_u))/a_u)**2.0
+#given_rho=rho
+#n_peak=(e_0*m/(e_ch**2.0))*(((given_rho*gamma_0)**(3.0/2.0)*(4.0*c*k_u))/a_u)**2.0
 print 'Peak density = ',n_p
-print 'Calculated n_peak from rho = ',n_peak
-scaled_n_peak=n_peak*Lg*Lc**2.0
-print 'Scaled n_peak = ',scaled_n_peak
+#print 'Calculated n_peak from rho = ',n_peak
+#scaled_n_peak=n_peak*Lg*Lc**2.0
+#print 'Scaled n_peak = ',scaled_n_peak
 # Puffin output arrays:
 z2=m_Z/Lc
 
@@ -137,11 +137,11 @@ py_bar=-1.0*m_PY[:]/(m*c*a_u)
 #sig_gamma_tot
 #sig_px_bar
 #sig_py_bar
-#Ne=m_WGHT[:]/n_p          # weight charge
-Ne=m_WGHT[:]          # weight number of electrons
+Ne=m_WGHT[:]/(n_p*Lg*Lc*Lc)          # weight charge
+#Ne=m_WGHT[:]          # weight number of electrons
 
 # Scale electrons weights wit scaled_n_peak (given rho in use !!)
-Ne=Ne/scaled_n_peak
+#Ne=Ne/scaled_n_peak
 del m_X, m_PX, m_Y, m_PY, m_Z, m_PZ, m_WGHT,p_tot 
 gc.collect()
 
