@@ -353,7 +353,7 @@ print Rand_Z
 Full_Z=Full_Z+(Rand_Z/np.sqrt(Full_Ne))
 
  
-output_file=tables.open_file(file_name_base+'_NS.si5','w')
+output_file=tables.open_file(file_name_base+'_CDF.h5','w')
 
 # Scale units from SI to p = p/mc
 

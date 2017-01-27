@@ -138,7 +138,7 @@ Pz=Pz/(me*c)
 
 full_array=np.vstack((X,Px,Y,Py,Z,Pz,NE)).T
 
-FinalHDF_File=step_no+'_PF.si5'
+FinalHDF_File=step_no+'_PF.h5'
 
 print 'Creating final HDF5 output...'
 output_file=tables.open_file(FinalHDF_File,'w')

@@ -89,7 +89,7 @@ c=3.0e+8                    # Speed of light
 m=9.11e-31                  # mass of electron
 e_0=8.854E-12               # charge of electron
 DensityFactor=4000          # Density factor i.e multiplier for number of particles
-SlicesMultiplyFactor=20  # How many layers of particles is desired for 4*Pi*Rho
+SlicesMultiplyFactor=20 # How many layers of particles is desired for 4*Pi*Rho
 #*************************************************************
 
 
@@ -179,7 +179,7 @@ m_Ym_Z=np.vstack((mA_Y.flat,mA_Z.flat)).T
 # Set the factor to extend histogram with ZERO values to smoothen the edges. Set to 0 if not needed.
 # The value of 0.15 means that the histogram will grow 30% in each direction (from -1.30*size to +1.13*size)
 
-S_factor=0.20
+S_factor=0.015
 
 # Create histogram for Z direction and stretch it using S_factor
 Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber_Z,range=((min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
@@ -203,7 +203,7 @@ y0_Z = Hz
 
 # If user want to use LSQ interpolation then unhash next three lines and comment the line where RBF is used 
 #z_hst_lngth=np.max(x0_Z)-np.min(x0_Z)
-#t_knots_z=np.linspace(np.min(x0_Z)+0.1*z_hst_lngth,np.max(x0_Z)-0.1*z_hst_lngth,3)
+#t_knots_z=np.linspace(np.min(x0_Z)+0.15*z_hst_lngth,np.max(x0_Z)-0.15*z_hst_lngth,13)
 #f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z)
 
 # Use RBF interpolation for Z-axis, hash next lines and unhash 3 lines for LSQ interpolation above  
@@ -298,26 +298,29 @@ Slice_Ne=np.zeros(Num_Of_Slice_Particles)
 # Calculate the min/max values for x/y along z-axis (outer shape)
 minz=np.min(mA_Z)
 maxz=np.max(mA_Z)
-step=(maxz-minz)/100
-mmax_X=np.zeros(100)
-mmin_X=np.zeros(100)
-mmax_Y=np.zeros(100)
-mmin_Y=np.zeros(100)
-mm_Z=np.zeros(100)
+step=(maxz-minz)/20
+mmax_X=np.zeros(20)
+mmin_X=np.zeros(20)
+mmax_Y=np.zeros(20)
+mmin_Y=np.zeros(20)
+mm_Z=np.zeros(20)
 
 # Create interpolated function which describes outer boundaries of initial electron beam
-for i in range(0,100):
+for i in range(0,20):
     mmax_X[i]=np.max(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmin_X[i]=np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmax_Y[i]=np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmin_Y[i]=np.min(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mm_Z[i]=0.5*((minz+step*(i))+(minz+step*(i+1)))
 
-f_mmax_X=interpolate.UnivariateSpline(mm_Z,mmax_X,ext=3)
-f_mmin_X=interpolate.UnivariateSpline(mm_Z,mmin_X,ext=3)
-f_mmax_Y=interpolate.UnivariateSpline(mm_Z,mmax_Y,ext=3)
-f_mmin_Y=interpolate.UnivariateSpline(mm_Z,mmin_Y,ext=3)
-
+#f_mmax_X=interpolate.UnivariateSpline(mm_Z,mmax_X)
+#f_mmin_X=interpolate.UnivariateSpline(mm_Z,mmin_X)
+#f_mmax_Y=interpolate.UnivariateSpline(mm_Z,mmax_Y)
+#f_mmin_Y=interpolate.UnivariateSpline(mm_Z,mmin_Y)
+f_mmax_X=interpolate.Rbf(mm_Z,mmax_X)
+f_mmin_X=interpolate.Rbf(mm_Z,mmin_X)
+f_mmax_Y=interpolate.Rbf(mm_Z,mmax_Y)
+f_mmin_Y=interpolate.Rbf(mm_Z,mmin_Y)
    
 #*** Procedure for placing electrons in each slice according to calculated CDF
 
@@ -371,8 +374,8 @@ def SliceCalculate(slice_number):
         xx_0_YZ=np.linspace(np.min(New_Yl),np.max(New_Yl),len(cumulative_nq_YZ))
 
 # Create CDF interpolation function using  UnivariateSpline 
-        ff_XZ = interpolate.UnivariateSpline(cumulative_nq_XZ, xx_0_XZ,ext=3)
-        ff_YZ = interpolate.UnivariateSpline(cumulative_nq_YZ, xx_0_YZ,ext=3)
+        ff_XZ = interpolate.UnivariateSpline(cumulative_nq_XZ, xx_0_XZ)
+        ff_YZ = interpolate.UnivariateSpline(cumulative_nq_YZ, xx_0_YZ)
         
 # Calculate the charge for current slice taking into account that there were some
 # slices with charge 0 added by using S_factor        
@@ -461,7 +464,7 @@ Rand_Z=Step_Size*(np.random.random(len(Full_Z)) - 0.5)
 Full_Z=Full_Z+(Rand_Z/np.sqrt(Full_Ne))
 
 # Open output file 
-output_file=tables.open_file(file_name_base+'_MPIg.si5','w')
+output_file=tables.open_file(file_name_base+'_CDF.h5','w')
 
 # Scale units from SI to p = p/mc
 
@@ -471,6 +474,10 @@ Full_PZ=Full_PZ/(m*c)
 
 # Merge all data into one array
 x_px_y_py_z_pz_NE = np.vstack([Full_X.flat,Full_PX.flat,Full_Y.flat,Full_PY.flat,Full_Z.flat,Full_PZ.flat,Full_Ne.flat]).T
+
+# Check for NaN calues in data - happens when using 'linear' option in momentum interpolations (griddata parameter)
+NaN_Mask=~np.any(np.isnan(x_px_y_py_z_pz_NE), axis=1)
+x_px_y_py_z_pz_NE=x_px_y_py_z_pz_NE[NaN_Mask]
 
 # Rescale the charge of new particle set (needed due to S_factor usage)
 ChargeFactor=InitialParticleCharge/np.sum(x_px_y_py_z_pz_NE[:,6]*e_ch)

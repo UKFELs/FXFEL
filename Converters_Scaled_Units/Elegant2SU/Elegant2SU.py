@@ -99,7 +99,7 @@ x_px_y_py_z_pz_NE = np.hstack([m_X,m_PX,m_Y,m_PY,m_Z_mr,m_PZ,No_Particles_Per_Re
 
 
 
-output_file=tables.open_file(file_name_base+'E2S.si5','w')
+output_file=tables.open_file(file_name_base+'_E2S.h5','w')
 
 # Create hdf5 file
 

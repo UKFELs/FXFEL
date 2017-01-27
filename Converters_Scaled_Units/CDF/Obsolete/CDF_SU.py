@@ -240,7 +240,7 @@ x_px_y_py_z_pz_NE = np.vstack([Full_X.flat,Full_PX.flat,Full_Y.flat,Full_PY.flat
 
 
 
-output_file=tables.open_file(file_name_base+'_Dense.si5','w')
+output_file=tables.open_file(file_name_base+'_CDF.h5','w')
 
 # Create hdf5 file
 
