@@ -317,6 +317,9 @@ for i in range(0,20):
 #f_mmin_X=interpolate.UnivariateSpline(mm_Z,mmin_X)
 #f_mmax_Y=interpolate.UnivariateSpline(mm_Z,mmax_Y)
 #f_mmin_Y=interpolate.UnivariateSpline(mm_Z,mmin_Y)
+# Choose below between cubic or linear approximation of shape
+
+
 f_mmax_X=interpolate.Rbf(mm_Z,mmax_X,function='cubic')
 f_mmin_X=interpolate.Rbf(mm_Z,mmin_X,function='cubic')
 f_mmax_Y=interpolate.Rbf(mm_Z,mmax_Y,function='cubic')
