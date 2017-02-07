@@ -300,7 +300,7 @@ minz=np.min(mA_Z)
 maxz=np.max(mA_Z)
 step=(maxz-minz)/20
 # Generate step for rescaled lenght (s_factor)
-step_s_factor=((maxz+(S_factor*size_z))-(minz-(S_factor*size_z)))/10
+step_s_factor=((maxz+(S_factor*size_z))-(minz-(S_factor*size_z)))/20
 mmax_X=np.zeros(20)
 mmin_X=np.zeros(20)
 mmax_Y=np.zeros(20)
