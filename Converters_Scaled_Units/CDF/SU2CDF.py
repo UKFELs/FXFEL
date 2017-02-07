@@ -299,6 +299,8 @@ Slice_Ne=np.zeros(Num_Of_Slice_Particles)
 minz=np.min(mA_Z)
 maxz=np.max(mA_Z)
 step=(maxz-minz)/20
+# Generate step for rescaled lenght (s_factor)
+step_s_factor=((maxz+(S_factor*size_z))-(minz-(S_factor*size_z)))/10
 mmax_X=np.zeros(20)
 mmin_X=np.zeros(20)
 mmax_Y=np.zeros(20)
@@ -311,8 +313,9 @@ for i in range(0,20):
     mmin_X[i]=np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmax_Y[i]=np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmin_Y[i]=np.min(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
-    mm_Z[i]=0.5*((minz+step*(i))+(minz+step*(i+1)))
-
+#    mm_Z[i]=0.5*((minz+step*(i))+(minz+step*(i+1)))
+#   Project the shape of beam on rescaled length (s_factor) 
+    mm_Z[i]=0.5*(((minz-(S_factor*size_z))+step_s_factor*(i))+((minz-(S_factor*size_z))+step_s_factor*(i+1)))
 #f_mmax_X=interpolate.UnivariateSpline(mm_Z,mmax_X)
 #f_mmin_X=interpolate.UnivariateSpline(mm_Z,mmin_X)
 #f_mmax_Y=interpolate.UnivariateSpline(mm_Z,mmax_Y)
