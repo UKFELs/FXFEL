@@ -282,9 +282,11 @@ plt.show()
 #*****End of plot
 
 # Initiate data for fitting density profile in each loop
-New_X=np.linspace(min(mA_X)-S_factor*size_x,max(mA_X)+S_factor*size_x,100)
-New_Y=np.linspace(min(mA_Y)-S_factor*size_y,max(mA_Y)+S_factor*size_y,100)
-New_Z=np.zeros(100)
+Fit_Particle_Number=1000
+
+New_X=np.linspace(min(mA_X)-S_factor*size_x,max(mA_X)+S_factor*size_x,Fit_Particle_Number)
+New_Y=np.linspace(min(mA_Y)-S_factor*size_y,max(mA_Y)+S_factor*size_y,Fit_Particle_Number)
+New_Z=np.zeros(Fit_Particle_Number)
 
 # Initiate empty array for Z positions or particles
 density_Z=np.zeros(Num_Of_Slice_Particles)
