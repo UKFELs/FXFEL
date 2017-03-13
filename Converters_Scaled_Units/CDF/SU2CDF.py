@@ -298,16 +298,19 @@ density_X=np.random.uniform(low=0, high=1, size=(Num_Of_Slice_Particles))
 Slice_Ne=np.zeros(Num_Of_Slice_Particles)
 
 # Calculate the min/max values for x/y along z-axis (outer shape)
+
+NumShapeSlices=20
 minz=np.min(mA_Z)
 maxz=np.max(mA_Z)
-step=(maxz-minz)/20
+step=(maxz-minz)/NumShapeSlices
 # Generate step for rescaled lenght (s_factor)
-step_s_factor=((maxz+(S_factor*size_z))-(minz-(S_factor*size_z)))/20
-mmax_X=np.zeros(20)
-mmin_X=np.zeros(20)
-mmax_Y=np.zeros(20)
-mmin_Y=np.zeros(20)
-mm_Z=np.zeros(20)
+step_s_factor=((maxz+(S_factor*size_z))-(minz-(S_factor*size_z)))/NumShapeSlices
+mmax_X=np.zeros(NumShapeSlices)
+mmin_X=np.zeros(NumShapeSlices)
+mmax_Y=np.zeros(NumShapeSlices)
+mmin_Y=np.zeros(NumShapeSlices)
+mm_Z=np.zeros(NumShapeSlices)
+
 
 # Create interpolated function which describes outer boundaries of initial electron beam
 for i in range(0,20):
