@@ -88,8 +88,8 @@ a_u=0.71572                 # undulator parameter ? a_u=a_w
 c=3.0e+8                    # Speed of light
 m=9.11e-31                  # mass of electron
 e_0=8.854E-12               # charge of electron
-DensityFactor=4000          # Density factor i.e multiplier for number of particles
-SlicesMultiplyFactor=20 # How many layers of particles is desired for 4*Pi*Rho
+DensityFactor=1000          # Density factor i.e multiplier for number of particles
+SlicesMultiplyFactor=10 # How many layers of particles is desired for 4*Pi*Rho
 #*************************************************************
 
 
@@ -313,7 +313,7 @@ mm_Z=np.zeros(NumShapeSlices)
 
 
 # Create interpolated function which describes outer boundaries of initial electron beam
-for i in range(0,20):
+for i in range(0,NumShapeSlices):
     mmax_X[i]=np.max(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmin_X[i]=np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
     mmax_Y[i]=np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
@@ -471,7 +471,7 @@ Full_PZ = async_result_PZ.get()
 
 # Add noise
 print 'Adding noise...'
-Rand_Z=Step_Size*(np.random.random(len(Full_Z)) - 0.5)
+Rand_Z=Step_Size*(np.random.random(len(Full_Z)) - 0.50)
 Full_Z=Full_Z+(Rand_Z/np.sqrt(Full_Ne))
 
 # Open output file 
