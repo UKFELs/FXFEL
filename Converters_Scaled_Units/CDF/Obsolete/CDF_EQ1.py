@@ -210,7 +210,7 @@ y0_Z = Hz
 #f_Z = interpolate.LSQUnivariateSpline(x0_Z, y0_Z,t_knots_z)
 
 # Use RBF interpolation for Z-axis, hash next lines and unhash 3 lines for LSQ interpolation above  
-f_Z = interpolate.Rbf(x0_Z, y0_Z)
+f_Z = interpolate.Rbf(x0_Z, y0_Z,function='linear')
 #f_Z = interpolate.interp1d(x0_Z, y0_Z,fill_value='extrapolate')
 #****Below is just for plotting
 m_Z_plt=np.linspace(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z,100)
