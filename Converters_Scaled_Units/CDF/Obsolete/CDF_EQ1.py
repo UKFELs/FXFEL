@@ -95,12 +95,12 @@ mA_Y = Particles[:,2]
 mA_Z = Particles[:,4]
 
 # Descale the momentum units from p/mc to SI - to keep compatibility with rest of calculations
-#mA_PX = Particles[:,1]*(m*c)
-#mA_PY = Particles[:,3]*(m*c)  
-#mA_PZ = Particles[:,5]*(m*c)
-mA_PX = Particles[:,1]
-mA_PY = Particles[:,3]  
-mA_PZ = Particles[:,5]
+mA_PX = Particles[:,1]*(m*c)
+mA_PY = Particles[:,3]*(m*c)  
+mA_PZ = Particles[:,5]*(m*c)
+#mA_PX = Particles[:,1]
+#mA_PY = Particles[:,3]  
+#mA_PZ = Particles[:,5]
 mA_WGHT = Particles[:,6]
 
 
