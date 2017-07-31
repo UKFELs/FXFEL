@@ -25,6 +25,19 @@ Created on Fri Apr  8 15:07:49 2016
 # The output file is saved as HDF5 file with VizSchema metadata added.
 
 
+#################################################################################
+#################################################################################
+#DISABLE WARNINGS - COMMENT IF YOU WISH TO SEE THE WARNINGS FROM BELOW CODE !!!!!
+#################################################################################
+#################################################################################
+import warnings
+warnings.filterwarnings('ignore')
+#################################################################################
+#################################################################################
+
+
+
+
 import numpy as np
 import tables
 import sys
@@ -83,13 +96,13 @@ Particles=f.root.Particles.read()
 # to value of Lc (binnumbers=total_length/Lc)
 # USER DATA - MODIFY ACCORDING TO REQUIREMENTS
 Pi=np.pi                    # Pi number taken from 'numpy' as more precise than just 3.1415
-k_u=228.47946               # Undulator wave number default=628 k_u=2*Pi/l_w
-a_u=0.71572                 # undulator parameter ? a_u=a_w
+k_u=251.327412              # Undulator wave number default=628 k_u=2*Pi/l_w
+a_u=1.225699                # undulator parameter ? a_u=a_w
 c=3.0e+8                    # Speed of light
 m=9.11e-31                  # mass of electron
 e_0=8.854E-12               # charge of electron
-DensityFactor=1000          # Density factor i.e multiplier for number of particles
-SlicesMultiplyFactor=10 # How many layers of particles is desired for 4*Pi*Rho
+DensityFactor=500         # Density factor i.e multiplier for number of particles
+SlicesMultiplyFactor=2 # How many layers of particles is desired for 4*Pi*Rho
 #*************************************************************
 
 
@@ -140,9 +153,9 @@ print 'Lc = ',Lc
 # This is to be user modified as the values strongly influence the data
 # Especially when density profile is not smooth
 
-binnumber_Z=10   
-binnumber_X=50
-binnumber_Y=50
+binnumber_Z=25   
+binnumber_X=150
+binnumber_Y=150
 print'Binnumber X,Y,Z = ',binnumber_X,binnumber_Y,binnumber_Z
 
 #*************************************************************
@@ -258,9 +271,10 @@ y_hst_lngth=np.max(YZarr[:,0])-np.min(YZarr[:,0])
 z_hst_lngth=np.max(XZarr[:,1])-np.min(XZarr[:,1])
 
 # Calculate knots (t) needed for LSQBivariateSpline
-t_XZ=np.linspace(np.min(XZarr[:,0])+0.1*x_hst_lngth,np.max(XZarr[:,0])-0.1*x_hst_lngth,5)
-t_YZ=np.linspace(np.min(YZarr[:,0])+0.1*y_hst_lngth,np.max(YZarr[:,0])-0.1*y_hst_lngth,5)
-t_ZZ=np.linspace(np.min(XZarr[:,1])+0.1*z_hst_lngth,np.max(XZarr[:,1])-0.1*z_hst_lngth,5)
+t_XZ=np.linspace(np.min(XZarr[:,0])+0.1*x_hst_lngth,np.max(XZarr[:,0])-0.1*x_hst_lngth,11)
+t_YZ=np.linspace(np.min(YZarr[:,0])+0.1*y_hst_lngth,np.max(YZarr[:,0])-0.1*y_hst_lngth,11)
+t_ZZ=np.linspace(np.min(XZarr[:,1])+0.1*z_hst_lngth,np.max(XZarr[:,1])-0.1*z_hst_lngth,11)
+
 
 # Interpolate using LSQBivariateSpline, hash if want to use Interp2D
 f_Dens_XZ=interpolate.LSQBivariateSpline(XZarr[:,0].ravel(), XZarr[:,1].ravel(),XZarr[:,2].ravel(),t_XZ,t_ZZ)
@@ -293,13 +307,47 @@ density_Z=np.zeros(Num_Of_Slice_Particles)
 
 #Initiate random placed particles with values 0-1 which will be next projected using CDF onto X,Y positions
 # The 0-1 is CDF value not the X,Y
-density_Y=np.random.uniform(low=0, high=1, size=(Num_Of_Slice_Particles))
-density_X=np.random.uniform(low=0, high=1, size=(Num_Of_Slice_Particles))
+
+
+from math import log, floor, ceil, fmod
+import numpy as np
+
+def halton(dim, nbpts):
+    h = np.empty(nbpts * dim)
+    h.fill(np.nan)
+    p = np.empty(nbpts)
+    p.fill(np.nan)
+    P = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31]
+    lognbpts = log(nbpts + 1)
+    for i in range(dim):
+        b = P[i]
+        n = int(ceil(lognbpts / log(b)))
+        for t in range(n):
+            p[t] = pow(b, -(t + 1) )
+
+        for j in range(nbpts):
+            d = j + 1
+            sum_ = fmod(d, b) * p[0]
+            for t in range(1, n):
+                d = floor(d / b)
+                sum_ += fmod(d, b) * p[t]
+
+            h[j*dim + i] = sum_
+
+    return h.reshape(nbpts, dim)
+
+#density_Y=np.random.uniform(low=0, high=1, size=(Num_Of_Slice_Particles))
+#density_X=np.random.uniform(low=0, high=1, size=(Num_Of_Slice_Particles))
+HALTON_XY=halton(2,Num_Of_Slice_Particles)
+print 'Halton shape is: ',np.shape(HALTON_XY)
+density_X=HALTON_XY[:,0]
+density_Y=HALTON_XY[:,1]
+
 Slice_Ne=np.zeros(Num_Of_Slice_Particles)
 
 # Calculate the min/max values for x/y along z-axis (outer shape)
 
-NumShapeSlices=20
+NumShapeSlices=40
 minz=np.min(mA_Z)
 maxz=np.max(mA_Z)
 step=(maxz-minz)/NumShapeSlices
@@ -444,7 +492,18 @@ for j in range(0,Num_Of_Slice_Particles):
         Full_Z[counter]=result[i][2][j]
         Full_Ne[counter]=result[i][3][j]
         counter=counter+1
-   
+
+
+# Add noise
+print 'Adding noise...'
+#Full_Ne=np.random.poisson(Full_Ne)
+Rand_Z=(Step_Size*(np.random.random(len(Full_Z)) - 0.50))/np.sqrt(Full_Ne)
+Full_Z=Full_Z+Rand_Z
+
+print 'Distance between slices = ',Step_Size
+#print 'Average noise shift = ',np.mean((Rand_Z/np.sqrt(Full_Ne)))
+#print 'Min and Max noise shift = ',np.min((Rand_Z/np.sqrt(Full_Ne))),' ',np.max((Rand_Z/np.sqrt(Full_Ne)))
+#print 'Noise standard deviation = ',np.std((Rand_Z/np.sqrt(Full_Ne)))   
 # Interpolate momentum onto new macroparticles using the momentum map from initial data   
 print 'Starting to interpolate momentum data... - takes time'
 
@@ -455,7 +514,7 @@ def Calculate_PY():
     Full_PY = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PY.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
     return Full_PY
 def Calculate_PZ(): 
-    Full_PZ = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PZ.ravel(),(Full_X, Full_Y, Full_Z), method='nearest')
+    Full_PZ = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PZ.ravel(),(Full_X, Full_Y, Full_Z), method='linear')
     return Full_PZ
     
 # Start three simultaneous processes for griddata interpolation
@@ -469,10 +528,7 @@ Full_PY = async_result_PY.get()
 Full_PZ = async_result_PZ.get()
 # End of interpolation
 
-# Add noise
-print 'Adding noise...'
-Rand_Z=Step_Size*(np.random.random(len(Full_Z)) - 0.50)
-Full_Z=Full_Z+(Rand_Z/np.sqrt(Full_Ne))
+
 
 # Open output file 
 output_file=tables.open_file(file_name_base+'_CDF.h5','w')
@@ -483,18 +539,26 @@ Full_PX=Full_PX/(m*c)
 Full_PY=Full_PY/(m*c)
 Full_PZ=Full_PZ/(m*c)
 
+
 # Merge all data into one array
 x_px_y_py_z_pz_NE = np.vstack([Full_X.flat,Full_PX.flat,Full_Y.flat,Full_PY.flat,Full_Z.flat,Full_PZ.flat,Full_Ne.flat]).T
+
+print 'Add Poisson noise to particle weights...'
+x_px_y_py_z_pz_NE[:,6]=np.random.poisson(x_px_y_py_z_pz_NE[:,6])
+
+# Remove all particles with weights <= zero
+x_px_y_py_z_pz_NE=x_px_y_py_z_pz_NE[x_px_y_py_z_pz_NE[:,6] > 0]
 
 # Check for NaN calues in data - happens when using 'linear' option in momentum interpolations (griddata parameter)
 NaN_Mask=~np.any(np.isnan(x_px_y_py_z_pz_NE), axis=1)
 x_px_y_py_z_pz_NE=x_px_y_py_z_pz_NE[NaN_Mask]
 
+
+
 # Rescale the charge of new particle set (needed due to S_factor usage)
 ChargeFactor=InitialParticleCharge/np.sum(x_px_y_py_z_pz_NE[:,6]*e_ch)
 print 'Charge scaling factor = ',ChargeFactor
 x_px_y_py_z_pz_NE[:,6]=x_px_y_py_z_pz_NE[:,6]*ChargeFactor
-
 
 print 'Final charge of particles = ',np.sum(x_px_y_py_z_pz_NE[:,6]*e_ch)  
 print 'Saving the output to files...'
