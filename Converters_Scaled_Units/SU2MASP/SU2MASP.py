@@ -7,7 +7,8 @@ Created on Mon Sep  7 14:56:42 2015
 import tables
 import sys
 
-m=9.11e-31
+c=3.0e+8                    # Speed of light
+m=9.11e-31                  # mass of electron
 
 if len(sys.argv)==2:
    file_name_in=sys.argv[1]
@@ -36,11 +37,11 @@ out=open(file_name_base+'_MSP.txt','w')
 
 for i in range(n):                                  
                 out.write("%.8e" %(Electrons[i,0]) + \
-                " %.8e" %(Electrons[i,1]) + \
+                " %.8e" %(Electrons[i,1]*m*c) + \
                 " %.8e" %(Electrons[i,2]) + \
-                " %.8e" %(Electrons[i,3]) + \
+                " %.8e" %(Electrons[i,3]*m*c) + \
                 " %.8e" %(Electrons[i,4]) + \
-                " %.8e" %(Electrons[i,5]) + \
+                " %.8e" %(Electrons[i,5]*m*c) + \
                 " %.8e" %(Electrons[i,6]) + "\n")                
                 
 #Close the files                
