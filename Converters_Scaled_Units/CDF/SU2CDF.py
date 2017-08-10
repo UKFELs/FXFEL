@@ -50,8 +50,6 @@ now = datetime.datetime.now()
 print 'Current time: ',now.strftime("%Y-%m-%d %H:%M:%S")
 
 
-e_ch=1.602e-19
-
 
 if len(sys.argv)==2:
    file_name_in=sys.argv[1]
@@ -100,7 +98,8 @@ k_u=251.327412              # Undulator wave number default=628 k_u=2*Pi/l_w
 a_u=1.225699                # undulator parameter ? a_u=a_w
 c=3.0e+8                    # Speed of light
 m=9.11e-31                  # mass of electron
-e_0=8.854E-12               # charge of electron
+e_0=8.854E-12               # vacuum permitivity
+e_ch=1.602e-19              # charge of one electron
 DensityFactor=500         # Density factor i.e multiplier for number of particles
 SlicesMultiplyFactor=2 # How many layers of particles is desired for 4*Pi*Rho
 #*************************************************************
