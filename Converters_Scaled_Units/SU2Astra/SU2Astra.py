@@ -17,7 +17,7 @@ if len(sys.argv)==2:
    file_name_in=sys.argv[1]
    print 'Processing file:', file_name_in
 else:
-   print 'Usage: SI_52Astra <FileName> \n'
+   print 'Usage: SU2Astra <FileName> \n'
    sys.exit(1)  
 file_name_base  = (file_name_in.split('.')[0]).strip()
 
@@ -30,8 +30,8 @@ Electrons=f.root.Particles.read()
 # Descale units from p/mc to SI used by Astra
 
 Electrons[:,1]=Electrons[:,1]*(me*c)
-Electrons[:,3]=Electrons[:,1]*(me*c)
-Electrons[:,5]=Electrons[:,1]*(me*c)
+Electrons[:,3]=Electrons[:,3]*(me*c)
+Electrons[:,5]=Electrons[:,5]*(me*c)
 
 # Assign number of records (macroparticles) as n
 n=len(Electrons)
@@ -48,7 +48,7 @@ refpy=0
 refpz=avg_Pz/5.36E-28
 refchrg=avg_chrg*e_ch*1.E9
 # Create output file named output.txt
-out=open(file_name_base+'_SI2A.txt','w')
+out=open(file_name_base+'_SU2A.txt','w')
 
 # create reference particle
 out.write("%.8e" %(refx) + " %.8e" %(refy) + " %.8e" %(refz) + " %.8e" %(refpx) + " %.8e" %(refpy) + " %.8e" %(refpz) + " %.8e" %(0) + " %.8e" %(refchrg) + " %.1i" %(1) + " %.1i" %(5) + "\n") 
@@ -65,7 +65,7 @@ for i in range(n):
                 " %.8e" %(Electrons[i,4]-avg_Z) + \
                 " %.8e" %(Electrons[i,1]/5.36E-28) + \
                 " %.8e" %(Electrons[i,3]/5.36E-28) + \
-                " %.8e" %((Electrons[i,5]-avg_Pz)/5.36E-28) + \
+                " %.8e" %((Electrons[i,5]/5.36E-28)-avg_Pz) + \
                 " %.8e" %(0) + \
                 " %.8e" %(Electrons[i,6]*e_ch*1.E9) + \
                 " %.1i" %(1) + \

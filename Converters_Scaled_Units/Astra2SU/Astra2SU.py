@@ -18,7 +18,7 @@ if len(sys.argv)==2:
    file_name_in=sys.argv[1]
    print 'Processing file:', file_name_in
 else:
-   print 'Usage: Astra2SI_5 <FileName> \n'
+   print 'Usage: Astra2SU <FileName> \n'
    sys.exit(1)  
 file_name_base  = (file_name_in.split('.')[0]).strip()
 
@@ -90,7 +90,7 @@ x_px_y_py_z_pz_NE = np.vstack([norm_x,norm_px,norm_y,norm_py,norm_z,norm_pz,((ma
 
 
 
-output_file=tables.open_file(file_name_base+'_A2S.h5','w')
+output_file=tables.open_file(file_name_base+'_A2SU.h5','w')
 
 # Create hdf5 file
 
