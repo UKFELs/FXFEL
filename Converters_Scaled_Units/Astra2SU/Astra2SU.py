@@ -13,6 +13,8 @@ now = datetime.datetime.now()
 print 'Conversion time: ',now.strftime("%Y-%m-%d %H:%M:%S")
 
 e_ch=1.602e-19
+me=9.11e-31
+c=2.99792458E8
 
 if len(sys.argv)==2:
    file_name_in=sys.argv[1]
@@ -65,21 +67,20 @@ for i in range(1,len(x)):
 #    norm_x[i]=(x[i]+x[0])
 #    norm_y[i]=(y[i]+y[0])
 #    norm_z[i]=(z[i]+z[0])
-    norm_px[i]=(px[i])*5.36E-28
-    norm_py[i]=(py[i])*5.36E-28
-    norm_pz[i]=(pz[i]+pz[0])*5.36E-28 
+    norm_px[i]=(px[i])*5.34428595e-28
+    norm_py[i]=(py[i])*5.34428595e-28
+    norm_pz[i]=(pz[i]+pz[0])*5.34428595e-28
     norm_x[i]=(x[i])
     norm_y[i]=(y[i])
     norm_z[i]=(z[i]+z[0])
 
 
-norm_px[0]=(px[0])*5.36E-28
-norm_py[0]=(py[0])*5.36E-28
-norm_pz[0]=(pz[0])*5.36E-28 
+norm_px[0]=(px[0])*5.34428595e-28
+norm_py[0]=(py[0])*5.34428595e-28
+norm_pz[0]=(pz[0])*5.34428595e-28 
 
 # Rescale to momentum over m*c
-me=9.11e-31
-c=3e+08
+
 
 norm_px=norm_px/(me*c)
 norm_py=norm_py/(me*c)
