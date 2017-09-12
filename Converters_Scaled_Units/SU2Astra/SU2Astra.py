@@ -65,7 +65,7 @@ for i in range(n):
                 " %.8e" %(Electrons[i,4]-avg_Z) + \
                 " %.8e" %(Electrons[i,1]/5.36E-28) + \
                 " %.8e" %(Electrons[i,3]/5.36E-28) + \
-                " %.8e" %((Electrons[i,5]/5.36E-28)-avg_Pz) + \
+                " %.8e" %((Electrons[i,5]-avg_Pz)/5.36E-28) + \
                 " %.8e" %(0) + \
                 " %.8e" %(Electrons[i,6]*e_ch*1.E9) + \
                 " %.1i" %(1) + \
