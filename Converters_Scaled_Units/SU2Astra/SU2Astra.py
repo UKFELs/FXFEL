@@ -38,7 +38,6 @@ n=len(Electrons)
 
 avg_Z=np.average(Electrons[:,4])
 avg_Pz=np.average(Electrons[:,5])
-avg_Time=avg_Z/c
 avg_chrg=np.average(Electrons[:,6])
 
 refx=0
@@ -52,7 +51,7 @@ refchrg=avg_chrg*e_ch*1.E9
 out=open(file_name_base+'_SU2A.txt','w')
 
 # create reference particle
-out.write("%.8e" %(refx) + " %.8e" %(refy) + " %.8e" %(refz) + " %.8e" %(refpx) + " %.8e" %(refpy) + " %.8e" %(refpz) + " %.8e" %(avg_Time/1.E-9) + " %.8e" %(refchrg) + " %.1i" %(1) + " %.1i" %(5) + "\n") 
+out.write("%.8e" %(refx) + " %.8e" %(refy) + " %.8e" %(refz) + " %.8e" %(refpx) + " %.8e" %(refpy) + " %.8e" %(refpz) + " %.8e" %(0) + " %.8e" %(refchrg) + " %.1i" %(1) + " %.1i" %(5) + "\n") 
 #out.write("%.8e" %(refx) + " %.8e" %(refy) + "\n") 
 
 # Write the whole array in MASP input format X,Px,Y,Py,Z,Pz,Weight_of_Particle
@@ -67,7 +66,7 @@ for i in range(n):
                 " %.8e" %(Electrons[i,1]/5.34428595e-28) + \
                 " %.8e" %(Electrons[i,3]/5.34428595e-28) + \
                 " %.8e" %((Electrons[i,5]-avg_Pz)/5.34428595e-28) + \
-                " %.8e" %((Electrons[i,4]/c-avg_Time)/1.E-9) + \
+                " %.8e" %(0) + \
                 " %.8e" %(Electrons[i,6]*e_ch*1.E9) + \
                 " %.1i" %(1) + \
                 " %.1i" %(5) + "\n")                        
