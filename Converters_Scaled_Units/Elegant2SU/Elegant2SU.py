@@ -16,7 +16,7 @@ print 'Conversion time: ',now.strftime("%Y-%m-%d %H:%M:%S")
 ERM=0.51099906 #Electron Rest Mass
 me=9.11e-31
 e_ch=1.602e-19
-c=3e+08
+c=2.99792458E8
 
 if len(sys.argv)==2:
    file_name_in=sys.argv[1]
@@ -60,7 +60,7 @@ for i, row in enumerate(f):
 
 
 
-m_PZ=(5.36E-28*(ERM*1.E6)*m_P)/(np.sqrt((m_XP**2)+(m_YP**2)+1.0))
+m_PZ=(5.34428595e-28*(ERM*1.E6)*m_P)/(np.sqrt((m_XP**2)+(m_YP**2)+1.0))
 m_PX=m_PZ*m_XP
 m_PY=m_PZ*m_YP
 
@@ -72,18 +72,16 @@ print 'Beta_Z = ',Beta_z
 
 p_tot=np.sqrt((m_PX[:]**2)+(m_PY[:]**2)+(m_PZ[:]**2))
 Gamma=(np.sqrt(1+(p_tot/(me*c))**2))
-#V_z=m_PZ/(Gamma*me)
-#Z_true=V_z*m_T
 
-
-# By some reason data is flipped along Z-axis, to correct it we need to flip it again,
-# therefore below lines that find min Z values and rotate the beam in this point (mirror flip).
-# So e.g. beam instead of looking like <<o will look like o>>
-# MIRROR FLIP REMOVED !!! IGNORE ABOVE !!!
-
-m_Z=m_T*c*Beta_z
-mirror_flip_z=np.min(m_Z)
-m_Z_mr=m_Z-((m_Z-mirror_flip_z)*2)
+# Rescale time to treat first particle as the one with longest flight time.
+# The time in elegant covers both: time of flight and time of emission
+# The particle with lowest time value was emitted first at Tmin
+# The particle with highest time value was emitted last at Tmax
+# The bunch lenght is Tmax-Tmin and thus the total flight times are reverted.
+Min_Time=np.min(m_T)
+Bunch_Length=np.max(m_T)-np.min(m_T)
+m_Scaled_T=2.0*(Min_Time)+Bunch_Length-m_T
+m_Z=m_Scaled_T*c*Beta_z
 
 No_Particles_Per_Record=np.zeros((linecount,1))
 
@@ -94,7 +92,7 @@ m_PX=m_PX/(me*c)
 m_PY=m_PY/(me*c)
 m_PZ=m_PZ/(me*c)
 
-x_px_y_py_z_pz_NE = np.hstack([m_X,m_PX,m_Y,m_PY,m_Z_mr,m_PZ,No_Particles_Per_Record])
+x_px_y_py_z_pz_NE = np.hstack([m_X,m_PX,m_Y,m_PY,m_Z,m_PZ,No_Particles_Per_Record])
 
 
 

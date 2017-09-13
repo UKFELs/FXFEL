@@ -12,7 +12,7 @@ import sys
 ERM=0.51099906 #Electron Rest Mass
 me=9.11e-31
 e_ch=1.602e-19
-c=3e+08
+c=2.99792458E8
 
 if len(sys.argv)==2:
    file_input_hdf=sys.argv[1]
@@ -39,16 +39,17 @@ NE=Electrons[:,6]
 particleID=np.arange(1,len(X)+1)
 print 'Processing data...'
 
-P=np.sqrt(Px**2+Py**2+Pz**2)/(5.36E-28*(ERM*1.E6))
+P=np.sqrt(Px**2+Py**2+Pz**2)/(5.34428595e-28*(ERM*1.E6))
 
 
-Beta_z=Pz/P/(5.36E-28*(ERM*1.E6))
+Beta_z=Pz/P/(5.34428595e-28*(ERM*1.E6))
 
 xp=Px/Pz
 yp=Py/Pz
 m_t=Z/(c*Beta_z)
-min_t=np.min(m_t)
-m_t_mr=m_t-((m_t-min_t)*2)
+Bunch_Length=np.max(m_t)-np.min(m_t)
+Min_Time=np.min(m_t)
+m_t_mr=(2.0*Min_Time)+Bunch_Length-m_t
 
 full_array=np.column_stack((X,xp,Y,yp,m_t_mr,P,particleID))
 
