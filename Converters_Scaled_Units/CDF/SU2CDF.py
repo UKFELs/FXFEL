@@ -100,8 +100,8 @@ c=3.0e+8                    # Speed of light
 m=9.11e-31                  # mass of electron
 e_0=8.854E-12               # vacuum permitivity
 e_ch=1.602e-19              # charge of one electron
-DensityFactor=500         # Density factor i.e multiplier for number of particles
-SlicesMultiplyFactor=2 # How many layers of particles is desired for 4*Pi*Rho
+DensityFactor=100         # Density factor i.e multiplier for number of particles
+SlicesMultiplyFactor=1 # How many layers of particles is desired for 4*Pi*Rho
 #*************************************************************
 
 
@@ -152,9 +152,9 @@ print 'Lc = ',Lc
 # This is to be user modified as the values strongly influence the data
 # Especially when density profile is not smooth
 
-binnumber_Z=25   
-binnumber_X=150
-binnumber_Y=150
+binnumber_Z=20   
+binnumber_X=50
+binnumber_Y=50
 print'Binnumber X,Y,Z = ',binnumber_X,binnumber_Y,binnumber_Z
 
 #*************************************************************
@@ -346,39 +346,45 @@ Slice_Ne=np.zeros(Num_Of_Slice_Particles)
 
 # Calculate the min/max values for x/y along z-axis (outer shape)
 
-NumShapeSlices=40
+NumShapeSlices=1000
 minz=np.min(mA_Z)
 maxz=np.max(mA_Z)
 step=(maxz-minz)/NumShapeSlices
 # Generate step for rescaled lenght (s_factor)
 step_s_factor=((maxz+(S_factor*size_z))-(minz-(S_factor*size_z)))/NumShapeSlices
-mmax_X=np.zeros(NumShapeSlices)
-mmin_X=np.zeros(NumShapeSlices)
-mmax_Y=np.zeros(NumShapeSlices)
-mmin_Y=np.zeros(NumShapeSlices)
-mm_Z=np.zeros(NumShapeSlices)
+mmax_X=np.zeros(0)
+mmin_X=np.zeros(0)
+mmax_Y=np.zeros(0)
+mmin_Y=np.zeros(0)
+mm_Z=np.zeros(0)
 
 
 # Create interpolated function which describes outer boundaries of initial electron beam
 for i in range(0,NumShapeSlices):
-    mmax_X[i]=np.max(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
-    mmin_X[i]=np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
-    mmax_Y[i]=np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
-    mmin_Y[i]=np.min(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
-#    mm_Z[i]=0.5*((minz+step*(i))+(minz+step*(i+1)))
-#   Project the shape of beam on rescaled length (s_factor) 
-    mm_Z[i]=0.5*(((minz-(S_factor*size_z))+step_s_factor*(i))+((minz-(S_factor*size_z))+step_s_factor*(i+1)))
-#f_mmax_X=interpolate.UnivariateSpline(mm_Z,mmax_X)
-#f_mmin_X=interpolate.UnivariateSpline(mm_Z,mmin_X)
-#f_mmax_Y=interpolate.UnivariateSpline(mm_Z,mmax_Y)
-#f_mmin_Y=interpolate.UnivariateSpline(mm_Z,mmin_Y)
+#    print minz+step*(i),' ',i
+#   Check if there are particles in shape slice
+    ShapeParticles = mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]
+#    print len(ShapeParticles)
+    if len(ShapeParticles)>1:
+        mmax_X=np.append(mmax_X,np.max(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+        mmin_X=np.append(mmin_X,np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+        mmax_Y=np.append(mmax_Y,np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+        mmin_Y=np.append(mmin_Y,np.min(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+    #    mm_Z[i]=0.5*((minz+step*(i))+(minz+step*(i+1)))
+    #   Project the shape of beam on rescaled length (s_factor) 
+        mm_Z=np.append(mm_Z,0.5*(((minz-(S_factor*size_z))+step_s_factor*(i))+((minz-(S_factor*size_z))+step_s_factor*(i+1))))
+f_mmax_X=interpolate.UnivariateSpline(mm_Z,mmax_X)
+f_mmin_X=interpolate.UnivariateSpline(mm_Z,mmin_X)
+f_mmax_Y=interpolate.UnivariateSpline(mm_Z,mmax_Y)
+f_mmin_Y=interpolate.UnivariateSpline(mm_Z,mmin_Y)
 # Choose below between cubic or linear approximation of shape
 
-
-f_mmax_X=interpolate.Rbf(mm_Z,mmax_X,function='cubic')
-f_mmin_X=interpolate.Rbf(mm_Z,mmin_X,function='cubic')
-f_mmax_Y=interpolate.Rbf(mm_Z,mmax_Y,function='cubic')
-f_mmin_Y=interpolate.Rbf(mm_Z,mmin_Y,function='cubic')
+#==============================================================================
+# f_mmax_X=interpolate.Rbf(mm_Z,mmax_X,function='linear')
+# f_mmin_X=interpolate.Rbf(mm_Z,mmin_X,function='linear')
+# f_mmax_Y=interpolate.Rbf(mm_Z,mmax_Y,function='linear')
+# f_mmin_Y=interpolate.Rbf(mm_Z,mmin_Y,function='linear')
+#==============================================================================
    
 #*** Procedure for placing electrons in each slice according to calculated CDF
 
@@ -431,9 +437,9 @@ def SliceCalculate(slice_number):
         xx_0_XZ=np.linspace(np.min(New_Xl),np.max(New_Xl),len(cumulative_nq_XZ))
         xx_0_YZ=np.linspace(np.min(New_Yl),np.max(New_Yl),len(cumulative_nq_YZ))
 
-# Create CDF interpolation function using  UnivariateSpline 
-        ff_XZ = interpolate.UnivariateSpline(cumulative_nq_XZ, xx_0_XZ)
-        ff_YZ = interpolate.UnivariateSpline(cumulative_nq_YZ, xx_0_YZ)
+# Create CDF interpolation function using  interp1d 
+        ff_XZ = interpolate.interp1d(cumulative_nq_XZ, xx_0_XZ)
+        ff_YZ = interpolate.interp1d(cumulative_nq_YZ, xx_0_YZ)
         
 # Calculate the charge for current slice taking into account that there were some
 # slices with charge 0 added by using S_factor        

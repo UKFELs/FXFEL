@@ -99,14 +99,14 @@ Particles=Particles[Particles[:,4].argsort()]
 # to value of Lc (binnumbers=total_length/Lc)
 # USER DATA - MODIFY ACCORDING TO REQUIREMENTS
 Pi=np.pi                    # Pi number taken from 'numpy' as more precise than just 3.1415
-k_u=228.47946               # Undulator wave number default=628 k_u=2*Pi/l_w
-a_u=1.225699                 # undulator parameter ? a_u=a_w
+k_u=251.327412              # Undulator wave number default=628 k_u=2*Pi/l_w
+a_u=1.225699                # undulator parameter ? a_u=a_w
 c=3.0e+8                    # Speed of light
 m=9.11e-31                  # mass of electron
 e_0=8.854E-12               # vacuum permitivity
-e_ch=1.602e-19              # charge of electron
-DensityFactor=10         # Density factor i.e multiplier for number of particles
-SlicesMultiplyFactor=1  # How many layers of particles is desired for 4*Pi*Rho
+e_ch=1.602e-19              # charge of one electron
+DensityFactor=100         # Density factor i.e multiplier for number of particles
+SlicesMultiplyFactor=1 # How many layers of particles is desired for 4*Pi*Rho
 #*************************************************************
 
 
@@ -150,7 +150,8 @@ omega_p=np.sqrt((e_ch*e_ch*n_p)/(e_0*m))
 
 rho=(1/gamma_0)*(((a_u*omega_p)/(4*c*k_u))**(2.0/3.0))
 lambda_u=(2.0*Pi)/k_u
-lambda_r=(lambda_u/(2*gamma_0**2.0))*(1.0+a_u**2.0)
+# Calculated for planar undulator -> (1+(a^2)/2)
+lambda_r=(lambda_u/(2.0*gamma_0**2.0))*(1+(a_u**2.0)/2.0)
 Lc=lambda_r/(4.0*Pi*rho)
 print 'Lc = ',Lc
 # End of inital data calculations
@@ -160,9 +161,9 @@ print 'Lc = ',Lc
 # This is to be user modified as the values strongly influence the data
 # Especially when density profile is not smooth
 
-binnumber_Z=20  
-binnumber_X=50
-binnumber_Y=50
+binnumber_Z=50  
+binnumber_X=150
+binnumber_Y=150
 print'Binnumber X,Y,Z = ',binnumber_X,binnumber_Y,binnumber_Z
 
 #*************************************************************
@@ -276,9 +277,9 @@ y_hst_lngth=np.max(YZarr[:,0])-np.min(YZarr[:,0])
 z_hst_lngth=np.max(XZarr[:,1])-np.min(XZarr[:,1])
 
 # Calculate knots (t) needed for LSQBivariateSpline
-t_XZ=np.linspace(np.min(XZarr[:,0])+0.1*x_hst_lngth,np.max(XZarr[:,0])-0.1*x_hst_lngth,17)
-t_YZ=np.linspace(np.min(YZarr[:,0])+0.1*y_hst_lngth,np.max(YZarr[:,0])-0.1*y_hst_lngth,17)
-t_ZZ=np.linspace(np.min(XZarr[:,1])+0.1*z_hst_lngth,np.max(XZarr[:,1])-0.1*z_hst_lngth,17)
+t_XZ=np.linspace(np.min(XZarr[:,0])+0.1*x_hst_lngth,np.max(XZarr[:,0])-0.1*x_hst_lngth,11)
+t_YZ=np.linspace(np.min(YZarr[:,0])+0.1*y_hst_lngth,np.max(YZarr[:,0])-0.1*y_hst_lngth,11)
+t_ZZ=np.linspace(np.min(XZarr[:,1])+0.1*z_hst_lngth,np.max(XZarr[:,1])-0.1*z_hst_lngth,11)
 
 
 # Interpolate using LSQBivariateSpline, hash if want to use Interp2D
@@ -310,25 +311,31 @@ New_Z=np.zeros(1000)
 
 
 # Calculate the min/max values for x/y along z-axis (outer shape)
-NumShapeSlices=40
+NumShapeSlices=1000
 minz=np.min(mA_Z)
 maxz=np.max(mA_Z)
 step=(maxz-minz)/NumShapeSlices
 # Generate step for rescaled lenght (s_factor)
 step_s_factor=((maxz+(S_factor*size_z))-(minz-(S_factor*size_z)))/NumShapeSlices
-mmax_X=np.zeros(NumShapeSlices)
-mmin_X=np.zeros(NumShapeSlices)
-mmax_Y=np.zeros(NumShapeSlices)
-mmin_Y=np.zeros(NumShapeSlices)
-mm_Z=np.zeros(NumShapeSlices)
+mmax_X=np.zeros(0)
+mmin_X=np.zeros(0)
+mmax_Y=np.zeros(0)
+mmin_Y=np.zeros(0)
+mm_Z=np.zeros(0)
 # Create interpolated function which describes outer boundaries of initial electron beam
 for i in range(0,NumShapeSlices):
-    mmax_X[i]=np.max(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
-    mmin_X[i]=np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
-    mmax_Y[i]=np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
-    mmin_Y[i]=np.min(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
-    mm_Z[i]=0.5*(((minz-(S_factor*size_z))+step_s_factor*(i))+((minz-(S_factor*size_z))+step_s_factor*(i+1)))
-
+#    print minz+step*(i),' ',i
+#   Check if there are particles in shape slice
+    ShapeParticles = mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]
+#    print len(ShapeParticles)
+    if len(ShapeParticles)>1:
+        mmax_X=np.append(mmax_X,np.max(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+        mmin_X=np.append(mmin_X,np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+        mmax_Y=np.append(mmax_Y,np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+        mmin_Y=np.append(mmin_Y,np.min(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+    #    mm_Z[i]=0.5*((minz+step*(i))+(minz+step*(i+1)))
+    #   Project the shape of beam on rescaled length (s_factor) 
+        mm_Z=np.append(mm_Z,0.5*(((minz-(S_factor*size_z))+step_s_factor*(i))+((minz-(S_factor*size_z))+step_s_factor*(i+1))))
 
 f_mmax_X=interpolate.Rbf(mm_Z,mmax_X,function='cubic')
 f_mmin_X=interpolate.Rbf(mm_Z,mmin_X,function='cubic')
