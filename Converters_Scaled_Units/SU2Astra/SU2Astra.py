@@ -46,7 +46,7 @@ refz=avg_Z
 refpx=0
 refpy=0
 refpz=avg_Pz/5.34428595e-28
-refchrg=avg_chrg*e_ch*1.E9
+refchrg=avg_chrg*-1.0*e_ch*1.E9
 # Create output file named output.txt
 out=open(file_name_base+'_SU2A.txt','w')
 
@@ -67,7 +67,7 @@ for i in range(n):
                 " %.8e" %(Electrons[i,3]/5.34428595e-28) + \
                 " %.8e" %((Electrons[i,5]-avg_Pz)/5.34428595e-28) + \
                 " %.8e" %(0) + \
-                " %.8e" %(Electrons[i,6]*e_ch*1.E9) + \
+                " %.8e" %(Electrons[i,6]*-1.0*e_ch*1.E9) + \
                 " %.1i" %(1) + \
                 " %.1i" %(5) + "\n")                        
                 
