@@ -121,9 +121,12 @@ print 'Peak density = ',n_p
 z2=m_Z/Lc
 
 # Find minimum of z2 and rescale z2 to start from 0.01
+# Flip the beam to keep proper direction in Puffin (z-ct)
 min_z2=min(z2)
-
-z2=z2-min_z2+0.01
+mean_z2=np.mean(z2)
+z2=(mean_z2-z2)+min_z2
+min_z22=min(z2)
+z2=z2-min_z22+0.01
 
 x_bar=m_X[:]/(np.sqrt(Lg*Lc))
 y_bar=m_Y[:]/(np.sqrt(Lg*Lc))
