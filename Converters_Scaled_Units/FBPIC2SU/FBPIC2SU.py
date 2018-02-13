@@ -49,7 +49,7 @@ m_NE=np.array(f[root_dir+'/'+time_step+'/particles/'+species+'/weighting'])
 
 m_Arr=np.vstack((m_X,m_PX,m_Y,m_PY,m_Z,m_PZ,m_NE)).T
 
-output_file=tables.open_file(file_name_base+'_WARP_FBIC_SI.hdf','w')
+output_file=tables.open_file(file_name_base+'_FBIC.h5','w')
 
 
 ParticleGroup=output_file.create_array('/','Particles', m_Arr)
