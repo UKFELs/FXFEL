@@ -18,7 +18,7 @@ if len(sys.argv)==3:
    array_name_in=sys.argv[2]
    print 'Processing file:', file_name_in,' Array name is: ',array_name_in
 else:
-   print 'Usage: VSim2SI_5 <FileName> <Array name>\n'
+   print 'Usage: VSim2SU <FileName> <Array name>\n'
    sys.exit(1)  
 file_name_base  = (file_name_in.split('.')[0]).strip()
 

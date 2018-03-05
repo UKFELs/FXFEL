@@ -18,7 +18,7 @@ if len(sys.argv)==2:
    file_input_hdf=sys.argv[1]
    print 'Processing file:', file_input_hdf
 else:
-   print 'Usage: SI_52Elegant <input_file> \n'
+   print 'Usage: SU2Elegant <input_file> \n'
    sys.exit(1)  
 file_name_base  = (file_input_hdf.split('.')[0]).strip()
 

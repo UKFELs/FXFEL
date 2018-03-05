@@ -14,7 +14,7 @@ if len(sys.argv)==2:
    file_name_in=sys.argv[1]
    print 'Processing file:', file_name_in
 else:
-   print 'Usage: SI_52MASP <FileName> \n'
+   print 'Usage: SU2MASP <FileName> \n'
    sys.exit(1)  
 file_name_base  = (file_name_in.split('.')[0]).strip()
 

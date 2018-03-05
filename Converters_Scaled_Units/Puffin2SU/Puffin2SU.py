@@ -22,7 +22,7 @@ if len(sys.argv)==2:
    step_name_in=sys.argv[1]
    print 'Processing file:', step_name_in
 else:
-   print 'Usage: Puffin2SI_5 <TimeStep Number e.g. 750> \n'
+   print 'Usage: Puffin2SU <TimeStep Number e.g. 750> \n'
    sys.exit(1)  
 
 
