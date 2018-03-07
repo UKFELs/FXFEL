@@ -257,9 +257,9 @@ HyHz,edges_YZ = np.histogramdd(m_Ym_Z, bins = (binnumber_Y,binnumber_Z),range=((
 
 
 # Gaussian smoothing of denisty profiles in X/Z and Y/Z
-Hz=ndimage.gaussian_filter(Hz,1.50)
-HxHz=ndimage.gaussian_filter(HxHz,1.50)
-HyHz=ndimage.gaussian_filter(HyHz,1.50)
+#Hz=ndimage.gaussian_filter(Hz,1.50)
+#HxHz=ndimage.gaussian_filter(HxHz,1.50)
+#HyHz=ndimage.gaussian_filter(HyHz,1.50)
 
 
 # Initiate empty array for data points in histogram (move the histogram to array like: Value,X,Y,Z)
@@ -616,10 +616,10 @@ Full_Z=Full_Z+Rand_Z
 print 'Starting to interpolate momentum data... - takes time' 
 
 def Calculate_PX(): 
-    Full_PX = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PX.ravel(),(Full_X, Full_Y, Full_Z), method='linear',rescale=True)
+    Full_PX = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PX.ravel(),(Full_X, Full_Y, Full_Z), method='nearest',rescale=True)
     return Full_PX
 def Calculate_PY():
-    Full_PY = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PY.ravel(),(Full_X, Full_Y, Full_Z), method='linear',rescale=True)
+    Full_PY = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PY.ravel(),(Full_X, Full_Y, Full_Z), method='nearest',rescale=True)
     return Full_PY
 def Calculate_PZ(): 
     Full_PZ = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PZ.ravel(),(Full_X, Full_Y, Full_Z), method='linear',rescale=True)
