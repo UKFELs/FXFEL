@@ -38,7 +38,7 @@ P = (np.sqrt(Electrons[:,1]**2+Electrons[:,3]**2+Electrons[:,5]**2))
 # Write the whole array in MASP input format X,Px,Y,Py,Z,Pz,Weight_of_Particle
 # This is done in loop - reading each item from Electrons array
 
-out=open(file_name_base+'_SI2Gen.txt','w')
+out=open(file_name_base+'_SU2Gen.txt','w')
 
 
 out.write('# Input Distribution from '+str(file_name_in)+"\n")
