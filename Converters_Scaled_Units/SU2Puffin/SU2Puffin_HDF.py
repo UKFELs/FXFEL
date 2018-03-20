@@ -40,37 +40,33 @@ def SU2Matched(fnamein):
 
     puffVars.genParams()  # generate rest of scaled params
 
-    qf = 3.22 * puffVars.lg  # focusing factor of quad
-
-    DL = 24. * puffVars.lw # Drift lengths
-
-    undmod = undulator(puffVars, undtype = 'planepole', Nw = 26)
-
-    twx, twy = getTwiss.getFODOTwiss(puffVars, undmod, qf, DL, emitx, emity):
-
-    twxr = twx[1:]
-    twyr = twy[1:]
-
-
-
-    TX1 = [1.8, 1.0]
-    TY1 = [0.07, 1.0]
-
-
-
-#    Get beam distribution and match to given parameters
-
-
+#    Get beam distribution and scale
 
     x, px, y, py, z, pz, wghts = SUF.readSUF(fnamein)
 
+    p_tot=np.sqrt((px[:]**2)+(py[:]**2)+(pz[:]**2))
 
-    x2, px2, y2, py2 = matchTwiss.matchTwiss(x, px, y, py, TX1, twxr, TY1, twyr)
+
+    gamma = (np.sqrt(1+(p_tot)**2))
+    gamma = gamma / puffVars.gamma0
+
+    xb = x / (np.sqrt(puffVars.lg * puffVars.lc))
+    yb = y / (np.sqrt(puffVars.lg * puffVars.lc))
+
+    pxb = px[:]/(puffVars.me * puffVars.c0 * puffVars.au)
+    pyb = -1.0 * py[:]/(puffVars.me * puffVars.c0 * puffVars.au)
+
+    z2 = -z / puffVars.lc   # (ct - z) / lc
+    z2 = z2 - min(z2) + 0.001
+
+    wghts = wghts / puffVars.npkbar
 
 
-    MPs=np.vstack((x2, px2, y2, py2, z, pz, wghts)).T
+    oname = file_name_base+'_matched.h5'
 
-    output_file=tables.open_file(file_name_base+'_matched.h5','w')
+    MPs=np.vstack((xb, pxb, yb, pyb, z2, gamma, wghts)).T
+
+    output_file=tables.open_file(oname,'w')
 
 
     ParticleGroup=output_file.create_array('/','Particles', MPs)
