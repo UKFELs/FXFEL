@@ -1,8 +1,8 @@
-
-import physConst
+import tables
+# import physConst
 
 def readSUF(fname):
-    f=tables.open_file(fnamein,'r')
+    f=tables.open_file(fname,'r')
     Electrons=f.root.Particles.read()
     
 # Assign the data to arrays
