@@ -528,13 +528,21 @@ def SliceCalculate(slice_number):
         cumulative_XZ=np.cumsum(Dens_XZ)
         cumulative_YZ=np.cumsum(Dens_YZ)
     
-# Sort the CDF and remove duplicates
-        cumulative_nq_XZ=sorted(set(cumulative_XZ))
-        cumulative_nq_YZ=sorted(set(cumulative_YZ))  
+# Sort the CDF and remove duplicates [MOT VALID ANYMORE]
+
+#        cumulative_nq_XZ=sorted(set(cumulative_XZ))
+#        cumulative_nq_YZ=sorted(set(cumulative_YZ))  
+# Create the CDF function
+        cumulative_nq_XZ=cumulative_XZ
+        cumulative_nq_YZ=cumulative_YZ  
+
 
 # Create linear array for interpolation of CDF onto new X,Y,Z
-        xx_0_XZ=np.linspace(np.min(New_Xl),np.max(New_Xl),len(cumulative_nq_XZ))
-        xx_0_YZ=np.linspace(np.min(New_Yl),np.max(New_Yl),len(cumulative_nq_YZ))
+#        xx_0_XZ=np.linspace(np.min(New_Xl),np.max(New_Xl),len(cumulative_nq_XZ))
+#        xx_0_YZ=np.linspace(np.min(New_Yl),np.max(New_Yl),len(cumulative_nq_YZ))
+# Do NOT use the outer boundary checks !
+        xx_0_XZ=np.linspace(np.min(New_X),np.max(New_X),len(cumulative_nq_XZ))
+        xx_0_YZ=np.linspace(np.min(New_Y),np.max(New_Y),len(cumulative_nq_YZ))
 
 # Create CDF interpolation function using  interp1d 
         ff_XZ = interpolate.interp1d(cumulative_nq_XZ, xx_0_XZ)
