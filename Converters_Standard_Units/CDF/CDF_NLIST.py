@@ -192,21 +192,21 @@ gamma=(np.sqrt(1+(p_tot/(m*c))**2))
 gamma_0=np.mean(gamma)
 
 
-omega_p=np.sqrt((e_ch*e_ch*n_p)/(e_0*m))
-rho=(1/gamma_0)*(((a_u*omega_p)/(4*c*k_u))**(2.0/3.0))
+#omega_p=np.sqrt((e_ch*e_ch*n_p)/(e_0*m))
+#rho=(1/gamma_0)*(((a_u*omega_p)/(4*c*k_u))**(2.0/3.0))
 
 
 
 
 
 lambda_u=(2*Pi)/k_u
-print 'Rho = ',rho
+#print 'Rho = ',rho
 # Calculated for planar undulator -> (1+(a^2)/2)
 lambda_r=(lambda_u/(2.0*gamma_0**2.0))*(1+(a_u**2.0)/2.0)
 #lambda_r=(lambda_u/(2*gamma_0**2))*(1+a_u**2)
-Lc=lambda_r/(4.0*Pi*rho)
+#Lc=lambda_r/(4.0*Pi*rho)
 print 'lambda_r = ',lambda_r
-print 'L_c = ',Lc
+#print 'L_c = ',Lc
 # End of inital data calculations
 
 #*************************************************************
@@ -319,7 +319,7 @@ for zz in range(1,len(edges_YZ[1])):
 # Calculate the number of slices using the SlicesMultiplyFactor and 4*Pi*rho calculated before
 # Do NOT change this line unless you want to set some number of slices not binded with 4*Pi*rho
 
-NumberOfSlices=int(SlicesMultiplyFactor*((max(mA_Z)+S_factor*size_z)-(min(mA_Z)-S_factor*size_z))/(4*Pi*rho*Lc))
+NumberOfSlices=int(SlicesMultiplyFactor*((max(mA_Z)+S_factor*size_z)-(min(mA_Z)-S_factor*size_z))/(lambda_r))
 print 'Number of slices = ',NumberOfSlices
 
 Num_Of_Slice_Particles=int(NumberOfSourceParticles*DensityFactor/NumberOfSlices)
@@ -420,28 +420,28 @@ step=(maxz-minz)/NumShapeSlices
 
 # Generate step for rescaled lenght (s_factor)
 step_s_factor=((maxz+(S_factor*size_z))-(minz-(S_factor*size_z)))/NumShapeSlices
-mmax_X=np.zeros(0)
-mmin_X=np.zeros(0)
-mmax_Y=np.zeros(0)
-mmin_Y=np.zeros(0)
-mm_Z=np.zeros(0)
+#mmax_X=np.zeros(0)
+#mmin_X=np.zeros(0)
+#mmax_Y=np.zeros(0)
+#mmin_Y=np.zeros(0)
+#mm_Z=np.zeros(0)
 
 
 
-def Weighted_Stats(values, weights):
+#def Weighted_Stats(values, weights):
 #    Return the weighted average and standard deviation
 
-    average = np.average(values, weights=weights)
-    variance = np.average((values-average)**2.0, weights=weights)  # Fast and numerically precise
-    return (np.sqrt(variance))
+#    average = np.average(values, weights=weights)
+#    variance = np.average((values-average)**2.0, weights=weights)  # Fast and numerically precise
+#    return (np.sqrt(variance))
 
 # Create interpolated function which describes outer boundaries of initial electron beam
-for i in range(0,NumShapeSlices):
+#for i in range(0,NumShapeSlices):
 #    print minz+step*(i),' ',i
 #   Check if there are particles in shape slice
-    ShapeParticles = mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]
+#    ShapeParticles = mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]
 #    print len(ShapeParticles)
-    if len(ShapeParticles)>1:
+#    if len(ShapeParticles)>1:
 #        mean_x=np.average(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
 #        std_x=Weighted_Stats(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))],weights=mA_WGHT[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
 #        std_x=np.std(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])         
@@ -453,18 +453,18 @@ for i in range(0,NumShapeSlices):
 #        std_y=np.std(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])         
 #        mmax_Y=np.append(mmax_Y,mean_y+std_y)
 #        mmin_Y=np.append(mmin_Y,mean_y-std_y)
-        mmax_X=np.append(mmax_X,np.max(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
-        mmin_X=np.append(mmin_X,np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
-        mmax_Y=np.append(mmax_Y,np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
-        mmin_Y=np.append(mmin_Y,np.min(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+#        mmax_X=np.append(mmax_X,np.max(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+#        mmin_X=np.append(mmin_X,np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+#        mmax_Y=np.append(mmax_Y,np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+#        mmin_Y=np.append(mmin_Y,np.min(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
     #    mm_Z[i]=0.5*((minz+step*(i))+(minz+step*(i+1)))
     #   Project the shape of beam on rescaled length (s_factor) 
-        mm_Z=np.append(mm_Z,0.5*(((minz-(S_factor*size_z))+step_s_factor*(i))+((minz-(S_factor*size_z))+step_s_factor*(i+1))))
+#        mm_Z=np.append(mm_Z,0.5*(((minz-(S_factor*size_z))+step_s_factor*(i))+((minz-(S_factor*size_z))+step_s_factor*(i+1))))
 
-f_mmax_X=interpolate.UnivariateSpline(mm_Z,mmax_X)
-f_mmin_X=interpolate.UnivariateSpline(mm_Z,mmin_X)
-f_mmax_Y=interpolate.UnivariateSpline(mm_Z,mmax_Y)
-f_mmin_Y=interpolate.UnivariateSpline(mm_Z,mmin_Y)
+#f_mmax_X=interpolate.UnivariateSpline(mm_Z,mmax_X)
+#f_mmin_X=interpolate.UnivariateSpline(mm_Z,mmin_X)
+#f_mmax_Y=interpolate.UnivariateSpline(mm_Z,mmax_Y)
+#f_mmin_Y=interpolate.UnivariateSpline(mm_Z,mmin_Y)
 
 # Choose below between cubic or linear approximation of shape
 #Smoothen the data
@@ -484,12 +484,12 @@ f_mmin_Y=interpolate.UnivariateSpline(mm_Z,mmin_Y)
 #*** Procedure for placing electrons in each slice according to calculated CDF
 
 # Create values for maximum values of X/Y of particle set
-OldRange_X=max(New_X)-min(New_X)
-OldRange_Y=max(New_Y)-min(New_Y)
-OldMin_X=min(New_X)
-OldMax_X=max(New_X)
-OldMin_Y=min(New_Y)
-OldMax_Y=max(New_Y)
+#OldRange_X=max(New_X)-min(New_X)
+#OldRange_Y=max(New_Y)-min(New_Y)
+#OldMin_X=min(New_X)
+#OldMax_X=max(New_X)
+#OldMin_Y=min(New_Y)
+#OldMax_Y=max(New_Y)
 
 
 SliceNumber=np.zeros(Num_Of_Slice_Particles)
@@ -502,10 +502,10 @@ def SliceCalculate(slice_number):
     SliceNumber[:]=slice_number
 
 # Scale the range of new particles to new particles set (keep the new particles within original shape of beam)
-    NewRange_X=f_mmax_X(Z_Slice_Value)-f_mmin_X(Z_Slice_Value)
-    NewRange_Y=f_mmax_Y(Z_Slice_Value)-f_mmin_Y(Z_Slice_Value)
-    New_Xl=(((New_X-OldMin_X)*NewRange_X)/OldRange_X)+f_mmin_X(Z_Slice_Value)
-    New_Yl=(((New_Y-OldMin_Y)*NewRange_Y)/OldRange_Y)+f_mmin_Y(Z_Slice_Value)
+#    NewRange_X=f_mmax_X(Z_Slice_Value)-f_mmin_X(Z_Slice_Value)
+#    NewRange_Y=f_mmax_Y(Z_Slice_Value)-f_mmin_Y(Z_Slice_Value)
+#    New_Xl=(((New_X-OldMin_X)*NewRange_X)/OldRange_X)+f_mmin_X(Z_Slice_Value)
+#    New_Yl=(((New_Y-OldMin_Y)*NewRange_Y)/OldRange_Y)+f_mmin_Y(Z_Slice_Value)
 
 # Interpolate density curev for current slice and remove values below 0
       
