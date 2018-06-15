@@ -67,7 +67,7 @@ import PARAMS_CDF
 try:
     k_u=PARAMS_CDF.k_u
 except:
-    k_u = 228.3636
+    k_u = 228.4727
 try:
     a_u=PARAMS_CDF.a_u
 except:
@@ -80,10 +80,10 @@ try:
     SlicesMultiplyFactor=PARAMS_CDF.SlicesMultiplyFactor
 except:
     SlicesMultiplyFactor = 20
-try:
-    binnumber=PARAMS_CDF.DensitySampling
-except:
-    binnumber = 15
+#try:
+#    binnumber=PARAMS_CDF.DensitySampling
+#except:
+#    binnumber = 15
 try:    
     binnumber_X=PARAMS_CDF.X_DensitySampling 
 except:
@@ -114,12 +114,12 @@ print 'k_u = ',k_u
 print 'a_u = ',a_u
 print 'Density Factor = ',DensityFactor
 print 'Slices per wavelnegth = ',SlicesMultiplyFactor
-print 'Particle density samples = ',binnumber
+#print 'Particle density samples = ',binnumber
 print 'Density sampling in X = ',binnumber_X
 print 'Density sampling in Y = ',binnumber_Y
 print 'Current / Density sampling in Z =' ,binnumber_Z
 print 'Stretching factor in Z = ',S_factor
-print 'Shape sampling number = ',NumShapeSlices
+#print 'Shape sampling number = ',NumShapeSlices
 #==============================================================================
 
 
@@ -144,7 +144,7 @@ Particles=f.root.Particles.read()
 # to value of Lc (binnumbers=total_length/Lc)
 # USER DATA - MODIFY ACCORDING TO REQUIREMENTS
 Pi=np.pi                    # Pi number taken from 'numpy' as more precise than just 3.1415
-c=3.0e+8                    # Speed of light
+c=299792458.0               # Speed of light
 m=9.11e-31                  # mass of electron
 e_0=8.854E-12               # vacuum permitivity
 e_ch=1.602e-19              # charge of one electron
@@ -178,12 +178,12 @@ size_y=max(mA_Y)-min(mA_Y)
 size_z=max(mA_Z)-min(mA_Z)
 # This is number of bins just to calculate initial data - don't change if not sure
 
-cube_volume=(size_x*size_y*size_z)/float(binnumber**3)
-print 'Volume of sample cube = ',cube_volume
+#cube_volume=(size_x*size_y*size_z)/float(binnumber**3)
+#print 'Volume of sample cube = ',cube_volume
 print 'Size of sample X,Y,Z = ', size_x,size_y,size_z
-H, edges = np.histogramdd(xyz, bins = (binnumber,binnumber,binnumber),normed=False,weights=mA_WGHT.flat)
-n_p=float(np.amax(H))/cube_volume
-print 'Particle density N_p = ',n_p
+#H, edges = np.histogramdd(xyz, bins = (binnumber,binnumber,binnumber),normed=False,weights=mA_WGHT.flat)
+#n_p=float(np.amax(H))/cube_volume
+#print 'Particle density N_p = ',n_p
 
 
 # Calculate some needed values: Omega,Rho,Lc,Lambda_U,Lambda_R,
@@ -199,7 +199,7 @@ gamma_0=np.mean(gamma)
 
 
 
-lambda_u=(2*Pi)/k_u
+lambda_u=(2.0*Pi)/k_u
 #print 'Rho = ',rho
 # Calculated for planar undulator -> (1+(a^2)/2)
 lambda_r=(lambda_u/(2.0*gamma_0**2.0))*(1+(a_u**2.0)/2.0)
@@ -212,28 +212,28 @@ print 'lambda_r = ',lambda_r
 #*************************************************************
 
 # Stack the particles and charge in common array to allow sorting of data along Z axis
-xyzW = np.vstack((mA_X.flat,mA_Y.flat,mA_Z.flat,mA_WGHT.flat)).T
+#xyzW = np.vstack((mA_X.flat,mA_Y.flat,mA_Z.flat,mA_WGHT.flat)).T
 # Sort the data along Z axis
-xyzW=xyzW[xyzW[:,2].argsort()]
+#xyzW=xyzW[xyzW[:,2].argsort()]
 
 
 #Calculate total charge
 TotalNumberOfElectrons=np.sum(mA_WGHT)
 
 # Assign the sorted data to separate arrays
-m_X=xyzW[:,0].flat
-m_Y=xyzW[:,1].flat
-m_Z=xyzW[:,2].flat
-m_WGHT=xyzW[:,3].flat
-NumberOfSourceParticles=len(m_X)
+#m_X=xyzW[:,0].flat
+#m_Y=xyzW[:,1].flat
+#m_Z=xyzW[:,2].flat
+#m_WGHT=xyzW[:,3].flat
+NumberOfSourceParticles=len(mA_X)
 InitialParticleCharge=TotalNumberOfElectrons*e_ch
 # Print some user useful informations
 
 print 'Initial charge of particles = ',InitialParticleCharge
 print 'Total number of electrons = ',TotalNumberOfElectrons
-print 'Number of source macroparticles = ',len(m_X)
-print 'Electrons/macroparticles in source data = ',round(TotalNumberOfElectrons/len(m_X))
-print 'Desired Electrons/macroparticles in output data = ',int(round(TotalNumberOfElectrons/(len(m_X)*DensityFactor)))
+print 'Number of source macroparticles = ',len(mA_X)
+print 'Electrons/macroparticles in source data = ',round(TotalNumberOfElectrons/len(mA_X))
+print 'Desired Electrons/macroparticles in output data = ',int(round(TotalNumberOfElectrons/(len(mA_X)*DensityFactor)))
 print 'Macroparticles in job = ',NumberOfSourceParticles
 
 
@@ -247,19 +247,25 @@ m_Ym_Z=np.vstack((mA_Y.flat,mA_Z.flat)).T
 #S_factor=0.015
 
 # Create histogram for Z direction and stretch it using S_factor
-Hz, edges_Z = np.histogramdd(m_Z, bins = binnumber_Z,range=((min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
-edges_YZ = np.histogramdd(m_Ym_Z, bins = (binnumber_Y,binnumber_Z),normed=False,weights=m_WGHT)
+Hz, edges_Z = np.histogramdd(mA_Z, bins = binnumber_Z,range=((min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=mA_WGHT)
+edges_YZ = np.histogramdd(m_Ym_Z, bins = (binnumber_Y,binnumber_Z),normed=False,weights=mA_WGHT)
 
 # Crate histogram for XZ and YZ planes and stretch it using S_factor variable
-HxHz,edges_XZ = np.histogramdd(m_Xm_Z, bins = (binnumber_X,binnumber_Z),range=((min(mA_X)-S_factor*size_x,max(mA_X)+S_factor*size_x),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
-HyHz,edges_YZ = np.histogramdd(m_Ym_Z, bins = (binnumber_Y,binnumber_Z),range=((min(mA_Y)-S_factor*size_y,max(mA_Y)+S_factor*size_y),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=m_WGHT)
+HxHz,edges_XZ = np.histogramdd(m_Xm_Z, bins = (binnumber_X,binnumber_Z),range=((min(mA_X)-S_factor*size_x,max(mA_X)+S_factor*size_x),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=mA_WGHT)
+HyHz,edges_YZ = np.histogramdd(m_Ym_Z, bins = (binnumber_Y,binnumber_Z),range=((min(mA_Y)-S_factor*size_y,max(mA_Y)+S_factor*size_y),(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)),normed=False,weights=mA_WGHT)
 
+# Calculate peak current
+#Peak_Current=((np.max(Hz)*e_ch)/(size_z/binnumber_Z))*c
+#print 'Peak current = ',Peak_Current
 
+# Peak concetration assumes circular transverse shape and averages over x/y
+#Transverse_area=(np.pi*((size_x+size_y)/2.0)**2.0)
+#print 'Peak concentration = ',Peak_Current/c/e_ch/(Transverse_area)
 
 # Gaussian smoothing of denisty profiles in X/Z and Y/Z
-#Hz=ndimage.gaussian_filter(Hz,1.50)
-#HxHz=ndimage.gaussian_filter(HxHz,1.50)
-#HyHz=ndimage.gaussian_filter(HyHz,1.50)
+#Hz=ndimage.gaussian_filter(Hz,1.0)
+#HxHz=ndimage.gaussian_filter(HxHz,1.0)
+#HyHz=ndimage.gaussian_filter(HyHz,1.0)
 
 
 # Initiate empty array for data points in histogram (move the histogram to array like: Value,X,Y,Z)
@@ -274,6 +280,8 @@ YZarr=np.zeros(((len(edges_YZ[0])-1)*(len(edges_YZ[1])-1),3))
 x0_Z = np.linspace(0.5*(edges_Z[0][0]+edges_Z[0][1]),0.5*(edges_Z[0][binnumber_Z]+edges_Z[0][binnumber_Z-1]),binnumber_Z)
 y0_Z = Hz
 
+
+
 # If user want to use LSQ interpolation then unhash next three lines and comment the line where RBF is used 
 #z_hst_lngth=np.max(x0_Z)-np.min(x0_Z)
 #t_knots_z=np.linspace(np.min(x0_Z)+0.15*z_hst_lngth,np.max(x0_Z)-0.15*z_hst_lngth,13)
@@ -281,20 +289,22 @@ y0_Z = Hz
 
 
 #Smoothen the data
-from statsmodels.nonparametric.smoothers_lowess import lowess
-smoothing_factor=0.01
-y0_Z_smth = lowess(y0_Z, x0_Z, frac=smoothing_factor)
+#from statsmodels.nonparametric.smoothers_lowess import lowess
+#smoothing_factor=0.01
+#y0_Z_smth = lowess(y0_Z, x0_Z, frac=smoothing_factor)
 #print y0_Z_smth
 
 # Use RBF interpolation for Z-axis, hash next lines and unhash 3 lines for LSQ interpolation above  
 #f_Z = interpolate.Rbf(y0_Z_smth[:,0], y0_Z_smth[:,1])
-f_Z = interpolate.UnivariateSpline(x0_Z, y0_Z_smth[:,1])
+f_Z = interpolate.UnivariateSpline(x0_Z, y0_Z)
 
 
 #****Below is just for plotting
 m_Z_plt=np.linspace(min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z,100)
 plt.plot(m_Z_plt,f_Z(m_Z_plt))
 plt.show()
+
+
 #****End of plotting Z axis density profile
 
 # Print the value of the bins with non-zero values in histogram
@@ -336,9 +346,9 @@ y_hst_lngth=np.max(YZarr[:,0])-np.min(YZarr[:,0])
 z_hst_lngth=np.max(XZarr[:,1])-np.min(XZarr[:,1])
 
 # Calculate knots (t) needed for LSQBivariateSpline
-t_XZ=np.linspace(np.min(XZarr[:,0])+0.1*x_hst_lngth,np.max(XZarr[:,0])-0.1*x_hst_lngth,25)
-t_YZ=np.linspace(np.min(YZarr[:,0])+0.1*y_hst_lngth,np.max(YZarr[:,0])-0.1*y_hst_lngth,25)
-t_ZZ=np.linspace(np.min(XZarr[:,1])+0.1*z_hst_lngth,np.max(XZarr[:,1])-0.1*z_hst_lngth,25)
+t_XZ=np.linspace(np.min(XZarr[:,0])+0.1*x_hst_lngth,np.max(XZarr[:,0])-0.1*x_hst_lngth,15)
+t_YZ=np.linspace(np.min(YZarr[:,0])+0.1*y_hst_lngth,np.max(YZarr[:,0])-0.1*y_hst_lngth,15)
+t_ZZ=np.linspace(np.min(XZarr[:,1])+0.1*z_hst_lngth,np.max(XZarr[:,1])-0.1*z_hst_lngth,15)
 
 
 # Interpolate using LSQBivariateSpline, hash if want to use Interp2D
@@ -420,11 +430,11 @@ step=(maxz-minz)/NumShapeSlices
 
 # Generate step for rescaled lenght (s_factor)
 step_s_factor=((maxz+(S_factor*size_z))-(minz-(S_factor*size_z)))/NumShapeSlices
-#mmax_X=np.zeros(0)
-#mmin_X=np.zeros(0)
-#mmax_Y=np.zeros(0)
-#mmin_Y=np.zeros(0)
-#mm_Z=np.zeros(0)
+mmax_X=np.zeros(0)
+mmin_X=np.zeros(0)
+mmax_Y=np.zeros(0)
+mmin_Y=np.zeros(0)
+mm_Z=np.zeros(0)
 
 
 
@@ -436,12 +446,12 @@ step_s_factor=((maxz+(S_factor*size_z))-(minz-(S_factor*size_z)))/NumShapeSlices
 #    return (np.sqrt(variance))
 
 # Create interpolated function which describes outer boundaries of initial electron beam
-#for i in range(0,NumShapeSlices):
+for i in range(0,NumShapeSlices):
 #    print minz+step*(i),' ',i
 #   Check if there are particles in shape slice
-#    ShapeParticles = mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]
+    ShapeParticles = mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]
 #    print len(ShapeParticles)
-#    if len(ShapeParticles)>1:
+    if len(ShapeParticles)>3:
 #        mean_x=np.average(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
 #        std_x=Weighted_Stats(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))],weights=mA_WGHT[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])
 #        std_x=np.std(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])         
@@ -453,13 +463,13 @@ step_s_factor=((maxz+(S_factor*size_z))-(minz-(S_factor*size_z)))/NumShapeSlices
 #        std_y=np.std(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))])         
 #        mmax_Y=np.append(mmax_Y,mean_y+std_y)
 #        mmin_Y=np.append(mmin_Y,mean_y-std_y)
-#        mmax_X=np.append(mmax_X,np.max(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
-#        mmin_X=np.append(mmin_X,np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
-#        mmax_Y=np.append(mmax_Y,np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
-#        mmin_Y=np.append(mmin_Y,np.min(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+        mmax_X=np.append(mmax_X,np.max(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+        mmin_X=np.append(mmin_X,np.min(mA_X[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+        mmax_Y=np.append(mmax_Y,np.max(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
+        mmin_Y=np.append(mmin_Y,np.min(mA_Y[(mA_Z>=(minz+step*(i))) & (mA_Z<(minz+step*(i+1)))]))
     #    mm_Z[i]=0.5*((minz+step*(i))+(minz+step*(i+1)))
     #   Project the shape of beam on rescaled length (s_factor) 
-#        mm_Z=np.append(mm_Z,0.5*(((minz-(S_factor*size_z))+step_s_factor*(i))+((minz-(S_factor*size_z))+step_s_factor*(i+1))))
+        mm_Z=np.append(mm_Z,0.5*(((minz-(S_factor*size_z))+step_s_factor*(i))+((minz-(S_factor*size_z))+step_s_factor*(i+1))))
 
 #f_mmax_X=interpolate.UnivariateSpline(mm_Z,mmax_X)
 #f_mmin_X=interpolate.UnivariateSpline(mm_Z,mmin_X)
@@ -475,20 +485,20 @@ step_s_factor=((maxz+(S_factor*size_z))-(minz-(S_factor*size_z)))/NumShapeSlices
 #mmax_Y_smth = lowess(mmax_Y, mm_Z, frac=smoothing_factor)
 #mmin_Y_smth = lowess(mmin_Y, mm_Z, frac=smoothing_factor)
 #==============================================================================
-#f_mmax_X=interpolate.Rbf(mm_Z,mmax_X,function='linear')
-#f_mmin_X=interpolate.Rbf(mm_Z,mmin_X,function='linear')
-#f_mmax_Y=interpolate.Rbf(mm_Z,mmax_Y,function='linear')
-#f_mmin_Y=interpolate.Rbf(mm_Z,mmin_Y,function='linear')
+f_mmax_X=interpolate.Rbf(mm_Z,mmax_X,function='linear')
+f_mmin_X=interpolate.Rbf(mm_Z,mmin_X,function='linear')
+f_mmax_Y=interpolate.Rbf(mm_Z,mmax_Y,function='linear')
+f_mmin_Y=interpolate.Rbf(mm_Z,mmin_Y,function='linear')
 #==============================================================================
    
 #*** Procedure for placing electrons in each slice according to calculated CDF
 
 # Create values for maximum values of X/Y of particle set
-#OldRange_X=max(New_X)-min(New_X)
-#OldRange_Y=max(New_Y)-min(New_Y)
-#OldMin_X=min(New_X)
+OldRange_X=max(New_X)-min(New_X)
+OldRange_Y=max(New_Y)-min(New_Y)
+OldMin_X=min(New_X)
 #OldMax_X=max(New_X)
-#OldMin_Y=min(New_Y)
+OldMin_Y=min(New_Y)
 #OldMax_Y=max(New_Y)
 
 
@@ -497,17 +507,17 @@ SliceNumber=np.zeros(Num_Of_Slice_Particles)
 def SliceCalculate(slice_number):
 
 # Calculate value (in meters) of current slice
-    Z_Slice_Value=(slice_number*Step_Size)+(np.min(m_Z)-S_factor*size_z)
+    Z_Slice_Value=(slice_number*Step_Size)+(np.min(mA_Z)-S_factor*size_z)
     density_Z[:]=Z_Slice_Value
     SliceNumber[:]=slice_number
 
 # Scale the range of new particles to new particles set (keep the new particles within original shape of beam)
-#    NewRange_X=f_mmax_X(Z_Slice_Value)-f_mmin_X(Z_Slice_Value)
-#    NewRange_Y=f_mmax_Y(Z_Slice_Value)-f_mmin_Y(Z_Slice_Value)
-#    New_Xl=(((New_X-OldMin_X)*NewRange_X)/OldRange_X)+f_mmin_X(Z_Slice_Value)
-#    New_Yl=(((New_Y-OldMin_Y)*NewRange_Y)/OldRange_Y)+f_mmin_Y(Z_Slice_Value)
+    NewRange_X=f_mmax_X(Z_Slice_Value)-f_mmin_X(Z_Slice_Value)
+    NewRange_Y=f_mmax_Y(Z_Slice_Value)-f_mmin_Y(Z_Slice_Value)
+    New_Xl=(((New_X-OldMin_X)*NewRange_X)/OldRange_X)+f_mmin_X(Z_Slice_Value)
+    New_Yl=(((New_Y-OldMin_Y)*NewRange_Y)/OldRange_Y)+f_mmin_Y(Z_Slice_Value)
 
-# Interpolate density curev for current slice and remove values below 0
+# Interpolate density curve for current slice and remove values below 0
       
     Dens_XZ=f_Dens_XZ(New_X,Z_Slice_Value)
     Dens_YZ=f_Dens_YZ(New_Y,Z_Slice_Value)
@@ -538,11 +548,11 @@ def SliceCalculate(slice_number):
 
 
 # Create linear array for interpolation of CDF onto new X,Y,Z
-#        xx_0_XZ=np.linspace(np.min(New_Xl),np.max(New_Xl),len(cumulative_nq_XZ))
-#        xx_0_YZ=np.linspace(np.min(New_Yl),np.max(New_Yl),len(cumulative_nq_YZ))
+        xx_0_XZ=np.linspace(np.min(New_Xl),np.max(New_Xl),len(cumulative_nq_XZ))
+        xx_0_YZ=np.linspace(np.min(New_Yl),np.max(New_Yl),len(cumulative_nq_YZ))
 # Do NOT use the outer boundary checks !
-        xx_0_XZ=np.linspace(np.min(New_X),np.max(New_X),len(cumulative_nq_XZ))
-        xx_0_YZ=np.linspace(np.min(New_Y),np.max(New_Y),len(cumulative_nq_YZ))
+#        xx_0_XZ=np.linspace(np.min(New_X),np.max(New_X),len(cumulative_nq_XZ))
+#        xx_0_YZ=np.linspace(np.min(New_Y),np.max(New_Y),len(cumulative_nq_YZ))
 
 # Create CDF interpolation function using  interp1d 
         ff_XZ = interpolate.interp1d(cumulative_nq_XZ, xx_0_XZ)
