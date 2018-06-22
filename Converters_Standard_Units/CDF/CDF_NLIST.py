@@ -104,8 +104,13 @@ try:
     NumShapeSlices=PARAMS_CDF.ShapeSampling
 except:
     NumShapeSlices = 100
+
     
-    
+if NumShapeSlices < 0:
+    NumShapeSlices = 50
+print 'user sampling = ',PARAMS_CDF.ShapeSampling
+
+
     
 
 #==============================================================================
@@ -485,10 +490,10 @@ for i in range(0,NumShapeSlices):
 #mmax_Y_smth = lowess(mmax_Y, mm_Z, frac=smoothing_factor)
 #mmin_Y_smth = lowess(mmin_Y, mm_Z, frac=smoothing_factor)
 #==============================================================================
-f_mmax_X=interpolate.Rbf(mm_Z,mmax_X,function='linear')
-f_mmin_X=interpolate.Rbf(mm_Z,mmin_X,function='linear')
-f_mmax_Y=interpolate.Rbf(mm_Z,mmax_Y,function='linear')
-f_mmin_Y=interpolate.Rbf(mm_Z,mmin_Y,function='linear')
+f_mmax_X=interpolate.Rbf(mm_Z,mmax_X,function='cubic')
+f_mmin_X=interpolate.Rbf(mm_Z,mmin_X,function='cubic')
+f_mmax_Y=interpolate.Rbf(mm_Z,mmax_Y,function='cubic')
+f_mmin_Y=interpolate.Rbf(mm_Z,mmin_Y,function='cubic')
 #==============================================================================
    
 #*** Procedure for placing electrons in each slice according to calculated CDF
@@ -504,7 +509,7 @@ OldMin_Y=min(New_Y)
 
 SliceNumber=np.zeros(Num_Of_Slice_Particles)
 
-def SliceCalculate(slice_number):
+def SliceCalculate(slice_number,NumShapeSlicesIN):
 
 # Calculate value (in meters) of current slice
     Z_Slice_Value=(slice_number*Step_Size)+(np.min(mA_Z)-S_factor*size_z)
@@ -512,11 +517,14 @@ def SliceCalculate(slice_number):
     SliceNumber[:]=slice_number
 
 # Scale the range of new particles to new particles set (keep the new particles within original shape of beam)
-    NewRange_X=f_mmax_X(Z_Slice_Value)-f_mmin_X(Z_Slice_Value)
-    NewRange_Y=f_mmax_Y(Z_Slice_Value)-f_mmin_Y(Z_Slice_Value)
-    New_Xl=(((New_X-OldMin_X)*NewRange_X)/OldRange_X)+f_mmin_X(Z_Slice_Value)
-    New_Yl=(((New_Y-OldMin_Y)*NewRange_Y)/OldRange_Y)+f_mmin_Y(Z_Slice_Value)
-
+    if NumShapeSlicesIN > 0:
+        NewRange_X=f_mmax_X(Z_Slice_Value)-f_mmin_X(Z_Slice_Value)
+        NewRange_Y=f_mmax_Y(Z_Slice_Value)-f_mmin_Y(Z_Slice_Value)
+        New_Xl=(((New_X-OldMin_X)*NewRange_X)/OldRange_X)+f_mmin_X(Z_Slice_Value)
+        New_Yl=(((New_Y-OldMin_Y)*NewRange_Y)/OldRange_Y)+f_mmin_Y(Z_Slice_Value)
+    else:
+        New_Xl=New_X
+        New_Yl=New_Y
 # Interpolate density curve for current slice and remove values below 0
       
     Dens_XZ=f_Dens_XZ(New_X,Z_Slice_Value)
@@ -586,7 +594,7 @@ def main():
         for slice_number in range(0,NumberOfSlices):
             ProgressValue=100*float(slice_number)/float(NumberOfSlices)
             print 'Completed = ',ProgressValue,' [%]\r',
-            pool.apply_async(SliceCalculate, (slice_number,), callback=result.append)
+            pool.apply_async(SliceCalculate, (slice_number,PARAMS_CDF.ShapeSampling,), callback=result.append)
         pool.close()
         pool.join()
     return result
