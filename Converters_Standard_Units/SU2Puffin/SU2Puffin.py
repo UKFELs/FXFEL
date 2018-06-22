@@ -59,7 +59,7 @@ Hn, edgesn = np.histogram(m_Z, bins = binnumber,normed=False,weights=m_WGHT.flat
 # Select slice from the beam with the peak number of electrons
 z_low  =np.max(m_Z)-(size_z*float(np.argwhere(Hn == Hn.max()))/(binnumber-1.0))
 z_high =np.max(m_Z)-(size_z*float(np.argwhere(Hn == Hn.max()))/(binnumber+1.0))
-print 'Zlow = ',z_low,' Zhigh = ',z_high
+#print 'Zlow = ',z_low,' Zhigh = ',z_high
 mA_X=m_X[(m_Z>=z_low) & (m_Z<=z_high)]
 mA_Y=m_Y[(m_Z>=z_low) & (m_Z<=z_high)]
 
@@ -67,7 +67,7 @@ from scipy.spatial import ConvexHull
 points = np.vstack([mA_X,mA_Y]).T
 #print points   # 30 random points in 2-D
 hull = ConvexHull(points)
-print 'Area = ',hull.volume
+#print 'Area = ',hull.volume
 
 
 #==============================================================================
@@ -126,7 +126,7 @@ Lg=lambda_u/(4*Pi*rho)
 
 print 'Lg= ',Lg
 print 'Lc= ',Lc
-print '4*Pi*Rho= ',4*Pi*rho
+#print '4*Pi*Rho= ',4*Pi*rho
 
 z2=m_Z/Lc
 
