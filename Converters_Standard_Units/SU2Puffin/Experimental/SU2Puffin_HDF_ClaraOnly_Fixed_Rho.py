@@ -21,14 +21,14 @@ if len(sys.argv)==2:
    file_name_in=sys.argv[1]
    print 'Processing file:', file_name_in
 else:
-   print 'Usage: SI_52Puffin <FileName> \n'
+   print 'Usage: SU2Puffin <FileName> \n'
    sys.exit(1)  
 file_name_base  = (file_name_in.split('.')[0]).strip()
 
 # Below line is used to pull charges from original file and not from Elegant source
 # where all charges are equal and thus faulty. 
-f_help=tables.open_file('0_PF.si5','r')
-Charges=f_help.root.Particles.read()
+#f_help=tables.open_file('0_PF.si5','r')
+#Charges=f_help.root.Particles.read()
 
 f=tables.open_file(file_name_in,'r')
 Electrons=f.root.Particles.read()
@@ -38,16 +38,15 @@ print Electrons.shape
 c=3.0e+8
 m=9.11e-31
 
-# Assign the data to array and descale the units from p/mc to SI !
-
 m_X = Electrons[:,0]
 m_PX = Electrons[:,1]*(m*c)
 m_Y = Electrons[:,2]
 m_PY = Electrons[:,3]*(m*c)
 m_Z = Electrons[:,4]
 m_PZ = Electrons[:,5]*(m*c)
-#m_WGHT = Electrons[:,6]
-m_WGHT = Charges[:,6
+m_WGHT = Electrons[:,6]
+
+
 
 del Electrons
 gc.collect()
@@ -78,9 +77,8 @@ gc.collect()
 
 # Puffin variables
 e_ch=1.602e-19
-c=3.0e+8
-m=9.11e-31
-Pi=3.1415
+
+Pi=np.pi
 k_u=228.47946               # Undulator wave number default=628 k_u=2*Pi/l_w
 a_u=0.71572                     # undulator parameter ? a_u=a_w
 e_0=8.854E-12              # vacuum permitivity
@@ -97,7 +95,7 @@ print 'Gamma= ',gamma_0
 
 rho=(1/gamma_0)*(((a_u*omega_p)/(4*c*k_u))**(2.0/3.0))
 
-#Temporary change of rho to rho = 0.005
+#Temporary change of rho to rho = 0.005 and gamma to 456.40
 rho = 0.0050
 gamma_0=456.40
 lambda_u=(2.0*Pi)/k_u
@@ -185,25 +183,6 @@ ParticleGroup._v_attrs.vsLimits='globalGridGlobalLimits'
 ParticleGroup._v_attrs.vsLabels='x_bar,y_bar,z2,px_bar,py_bar,gamma,Ne'
 #Close the file
 output_file.close()
-
-m_Arr[:,6]=m_Arr[:,6]*scaled_n_peak
-#print 'Creating txt output file...'
-#out_txt=open(file_name_base+'_Puffin.txt','w')
-##
-#n=len(m_Arr)
-##
-#out_txt.write('__[x_bar]_______[y_bar]_______[px_bar]______[py_bar]_____ [Gamma]________[Z2]__________[Ne]_____'+'\n')
-#for i in range(n): 
-#        out_txt.write(      "%.6e" %(m_Arr[i,0]) + \
-#                            " % .6e" %(m_Arr[i,1]) + \
-#                            " % .6e" %(m_Arr[i,3]) + \
-#                            " % .6e" %(m_Arr[i,4]) + \
-#                            " % .6e" %(m_Arr[i,5]) + \
-#                            " % .6e" %(m_Arr[i,2]) + \
-#                            " % .6e" %(m_Arr[i,6]) + "\n")
-#out_txt.close()
-#del m_Arr
-#gc.collect()
 
 
 
