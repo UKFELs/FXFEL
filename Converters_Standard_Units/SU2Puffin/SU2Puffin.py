@@ -52,13 +52,24 @@ binnumber=20
 #print m_WGHT.shape
 
 Hn, edgesn = np.histogram(m_Z, bins = binnumber,normed=False,weights=m_WGHT.flat)
+#print Hn
+if all(x==Hn[0] for x in Hn)==True:
+    print 'This seems like a Flat-Top beam...'
+    z_low  = np.max(m_Z)-(size_z*float((binnumber/2))+1.0)
+    z_high = np.max(m_Z)-(size_z*float((binnumber/2))-1.0)
+else:
+    print 'Not a Flat-Top beam...'
+    z_low  =np.max(m_Z)-(size_z*float(np.argwhere(Hn == Hn.max()))/(binnumber-1.0))
+    z_high =np.max(m_Z)-(size_z*float(np.argwhere(Hn == Hn.max()))/(binnumber+1.0))
 #print 'Max value for x = ', np.argwhere(Hn == Hn.max())
 #print 'Edges = ',edgesn[np.argwhere(Hn == Hn.max())]
 #print edgesn
 
 # Select slice from the beam with the peak number of electrons
-z_low  =np.max(m_Z)-(size_z*float(np.argwhere(Hn == Hn.max()))/(binnumber-1.0))
-z_high =np.max(m_Z)-(size_z*float(np.argwhere(Hn == Hn.max()))/(binnumber+1.0))
+
+
+#z_low  =np.max(m_Z)-(size_z*float(np.argwhere(Hn == Hn.max()))/(binnumber-1.0))
+#z_high =np.max(m_Z)-(size_z*float(np.argwhere(Hn == Hn.max()))/(binnumber+1.0))
 #print 'Zlow = ',z_low,' Zhigh = ',z_high
 mA_X=m_X[(m_Z>=z_low) & (m_Z<=z_high)]
 mA_Y=m_Y[(m_Z>=z_low) & (m_Z<=z_high)]
