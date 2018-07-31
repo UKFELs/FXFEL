@@ -54,11 +54,11 @@ binnumber=20
 Hn, edgesn = np.histogram(m_Z, bins = binnumber,normed=False,weights=m_WGHT.flat)
 #print Hn
 if all(x==Hn[0] for x in Hn)==True:
-    print 'This seems like a Flat-Top beam...'
+    print 'This seems like a perfect-ideal Flat-Top beam.'
     z_low  = np.max(m_Z)-(size_z*float((binnumber/2))+1.0)
     z_high = np.max(m_Z)-(size_z*float((binnumber/2))-1.0)
 else:
-    print 'Not a Flat-Top beam...'
+    print 'Not a perfect-ideal Flat-Top beam.'
     z_low  =np.max(m_Z)-(size_z*float(np.argwhere(Hn == Hn.max()))/(binnumber-1.0))
     z_high =np.max(m_Z)-(size_z*float(np.argwhere(Hn == Hn.max()))/(binnumber+1.0))
 #print 'Max value for x = ', np.argwhere(Hn == Hn.max())
