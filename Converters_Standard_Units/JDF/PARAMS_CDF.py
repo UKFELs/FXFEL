@@ -1,9 +1,0 @@
-k_u=228.4727
-a_u=1.0121809
-DensityFactor=500
-SlicesMultiplyFactor=10
-X_DensitySampling=40
-Y_DensitySampling=40
-Z_DensitySampling=40
-BeamStretchFactor=0.0
-ShapeSampling=-1
