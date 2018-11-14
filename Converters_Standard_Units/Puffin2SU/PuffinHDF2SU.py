@@ -57,11 +57,11 @@ z_su=m_Z*Lc
 px_su=m*c*a_u*m_PX
 py_su=-1.0*m*c*a_u*m_PY
 gamma=m_GAMMA*gamma_Scale
-pz_su=np.sqrt(((m*c)**2.0)(gamma**2.0-1.0)-px_su**2.0-py_su**2.0)
+pz_su=np.sqrt(((m*c)**2.0)*(gamma**2.0-1.0)-px_su**2.0-py_su**2.0)
 
-WGHT=m_WGHT*(npk*Lg*Lc*Lc)
+WGHT=m_WGHT*(npk)
 #print np.size(p_tot),p_tot1
-FullArray = np.vstack((x_su,px_su,y_su,py_su,z_su,pz_su,WGHT)).T
+FullArray = np.vstack((x_su,px_su/(m*c),y_su,py_su/(m*c),z_su,pz_su/(m*c),WGHT)).T
 
 
 
