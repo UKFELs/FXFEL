@@ -1,8 +1,8 @@
-k_u=228.4727
-a_u=1.0121809
-SlicesMultiplyFactor=20
-X_DensitySampling=120
-Y_DensitySampling=120
-Z_DensitySampling=120
+k_u=157.08
+a_u=1.0
+SlicesMultiplyFactor=4
+X_DensitySampling=100
+Y_DensitySampling=100
+Z_DensitySampling=100
 BeamStretchFactor=0.0
-NumOfSliceParticles=800
+NumOfSliceParticles=1000

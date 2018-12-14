@@ -17,7 +17,8 @@ import time
 ### The below line os.nice(15) is to reduce the process priority on your system
 ### This is to allow your system to behave more smoothly while still the
 ### JDF will utilize all of its resources
-#os.nice(15)
+import os
+os.nice(20)
 
 
 
@@ -47,7 +48,7 @@ def JDF_CORE(f_Z,Xin,Yin,dist_in,varargin,DDDx,DDDy,DDDz,NoOfElec):
     x0=Xin2[ind1]
 
 #    find corresponding indices and weights in the other dimension
-    ind_temp = np.argsort((x0-Xin)**2.)   
+    ind_temp = np.argsort(np.square(x0-Xin))   
     ind_temp = ind_temp[:,:2]
 
 
@@ -108,24 +109,25 @@ def HaltonRandomNumber(dim, nbpts):
     return h.reshape(nbpts, dim)
 
 
-def SliceCalculate(i,StepZ,NumberOfSlices,interpolator,f_Z,new_x,new_y,Non_Zero_Z,Num_Of_Slice_Particles,minz,JDFSmoothing,RandomHaltonSequence):
+def SliceCalculate(z_hlt,i,StepZ,NumberOfSlices,interpolator,f_Z,new_x,new_y,Non_Zero_Z,Num_Of_Slice_Particles,minz,JDFSmoothing,RandomHaltonSequence):
     print 'Slice ',i,' of ',NumberOfSlices
     new_z=np.full((1),(minz+(StepZ*i)))
     xx,yy,zz=np.meshgrid(new_x,new_y,new_z)
     positionsin = np.column_stack((xx.ravel('F'), yy.ravel('F'), zz.ravel('F'), interpolator(xx,yy,zz).ravel('F') ))
     xy_flat=np.vstack((positionsin[:,0], positionsin[:,1])).T
     hist2d_flat,edges=np.histogramdd(xy_flat,bins=(100,100), weights=positionsin[:,3])
-    if np.sum(hist2d_flat)>0:
-        Dist=hist2d_flat
-        Xin=np.linspace(np.min(positionsin[:,0]),np.max(positionsin[:,0]),100)
-        Yin=np.linspace(np.min(positionsin[:,1]),np.max(positionsin[:,1]),100)
-        dots=[]
-        ZZZ=minz+(i*StepZ)
-        NoOfElec=(Non_Zero_Z)*(f_Z(ZZZ)/(NumberOfSlices))/(Num_Of_Slice_Particles)
-        for j in range (0,Num_Of_Slice_Particles):
-            result=JDF_CORE(f_Z,Xin,Yin,Dist,JDFSmoothing,RandomHaltonSequence[j,0],RandomHaltonSequence[j,1],ZZZ,NoOfElec)
-            dots.append(result[:,0])
-        return dots
+#if np.sum(hist2d_flat)>0:
+    Dist=hist2d_flat
+    Xin=np.linspace(np.min(positionsin[:,0]),np.max(positionsin[:,0]),100)
+    Yin=np.linspace(np.min(positionsin[:,1]),np.max(positionsin[:,1]),100)
+    dots=[]
+    ZZZ=minz+(i*StepZ)
+    ZZZ_in=np.full((Num_Of_Slice_Particles),minz+(i*StepZ)+(StepZ*z_hlt))        
+    NoOfElec=(Non_Zero_Z)*(f_Z(ZZZ)/(NumberOfSlices))/(Num_Of_Slice_Particles)
+    for j in range (0,Num_Of_Slice_Particles):
+        result=JDF_CORE(f_Z,Xin,Yin,Dist,JDFSmoothing,RandomHaltonSequence[j,0],RandomHaltonSequence[j,1],ZZZ_in[j],NoOfElec)
+        dots.append(result[:,0])
+    return dots
     
 ##################################################################
 ##################################################################
@@ -212,7 +214,7 @@ if __name__ == '__main__':
     e_ch=1.602e-19              # charge of one electron
     
     #*************************************************************
-    JDFSmoothing=20
+    JDFSmoothing=100
     
     
     
@@ -250,14 +252,19 @@ if __name__ == '__main__':
     gamma=(np.sqrt(1+(p_tot/(m*c))**2.))
     gamma_0=np.mean(gamma)
     RandomHaltonSequence=HaltonRandomNumber(2,Num_Of_Slice_Particles)
-    #RandomHaltonSequence=np.random.rand(Num_Of_Slice_Particles,2)
+    z_hlt=0.5-HaltonRandomNumber(2,Num_Of_Slice_Particles)
+   #RandomHaltonSequence=np.random.rand(Num_Of_Slice_Particles,2)
     ## Linear smoothing between bins in JDF_CORE
     
     
     lambda_u=(2.0*Pi)/k_u
+    # Use plane-pole undulator
+    # lambda_r=(lambda_u/(2.0*gamma_0**2.0))*(1+(a_u**2.0)/2.0)
+    # print 'Using plane-pole undulator configuration !'
     
-    lambda_r=(lambda_u/(2.0*gamma_0**2.0))*(1+(a_u**2.0)/2.0)
-    
+    # Use helical undulator
+    lambda_r=(lambda_u/(2*gamma_0**2))*(1+a_u**2)    
+    print 'Using helical undulator configuration !'
     print 'lambda_r = ',lambda_r
 
     NumberOfSlices=int(SlicesMultiplyFactor*((max(mA_Z)+S_factor*size_z)-(min(mA_Z)-S_factor*size_z))/(lambda_r))
@@ -321,8 +328,8 @@ if __name__ == '__main__':
     StepZ=(maxz-minz)/NumberOfSlices
 
     #result2=JDF_PARALLEL(NumberOfSlices,StepZ,minx,maxx,miny,maxy,interpolator,Non_Zero_Z,f_Z,Num_Of_Slice_Particles,minz,RandomHaltonSequence)
-    new_x=np.linspace(minx,maxx,100)
-    new_y=np.linspace(miny,maxy,100)
+    #new_x=np.linspace(minx,maxx,100)
+    #new_y=np.linspace(miny,maxy,100)
     pool = multiprocessing.Pool()
     print 'Executing main JDF loop...'
     result2 = []
@@ -333,9 +340,9 @@ if __name__ == '__main__':
         NoOfElec=(Non_Zero_Z)*(f_Z(ZZZ)/(NumberOfSlices))/(Num_Of_Slice_Particles)
         if NoOfElec>0:
             slice_list.append(slice_number)
-
+    
     for slice_number in slice_list:
-        pool.apply_async(SliceCalculate, args=(slice_number,StepZ,NumberOfSlices,interpolator,f_Z,new_x,new_y,Non_Zero_Z,Num_Of_Slice_Particles,minz,JDFSmoothing,RandomHaltonSequence), callback=result2.append)
+        pool.apply_async(SliceCalculate, args=(z_hlt[:,1],slice_number,StepZ,NumberOfSlices,interpolator,f_Z,new_x,new_y,Non_Zero_Z,Num_Of_Slice_Particles,minz,JDFSmoothing,RandomHaltonSequence), callback=result2.append)
     pool.close()
     pool.join()
     
@@ -345,7 +352,7 @@ if __name__ == '__main__':
 #        ZZZ=minz+(slice_number*StepZ)
 #        NoOfElec=(Non_Zero_Z)*(f_Z(ZZZ)/(NumberOfSlices))/(Num_Of_Slice_Particles)
 #        if NoOfElec>0:
-#            results=SliceCalculate(slice_number,StepZ,NumberOfSlices,interpolator,f_Z,new_x,new_y,Non_Zero_Z,Num_Of_Slice_Particles,minz,JDFSmoothing,RandomHaltonSequence)
+#            results=SliceCalculate(z_hlt[:,0],slice_number,StepZ,NumberOfSlices,interpolator,f_Z,new_x,new_y,Non_Zero_Z,Num_Of_Slice_Particles,minz,JDFSmoothing,RandomHaltonSequence)
 #            result2.append(results)
 #==============================================================================
 
@@ -412,7 +419,7 @@ if __name__ == '__main__':
     x_px_y_py_z_pz_NE[:,6]=np.random.poisson(x_px_y_py_z_pz_NE[:,6])
     
     # Remove all particles with weights <= zero
-    x_px_y_py_z_pz_NE=x_px_y_py_z_pz_NE[x_px_y_py_z_pz_NE[:,6] >= 0]
+    x_px_y_py_z_pz_NE=x_px_y_py_z_pz_NE[x_px_y_py_z_pz_NE[:,6] > 0]
     
     # Check for NaN calues in data - happens when using 'linear' option in momentum interpolations (griddata parameter)
     NaN_Mask=~np.any(np.isnan(x_px_y_py_z_pz_NE), axis=1)
@@ -430,7 +437,7 @@ if __name__ == '__main__':
     
     # Create Group in HDF5 and add metadata for Visit
     # Open output file 
-    output_file=tables.open_file(file_name_base+'_JDF_interp1d.h5','w')
+    output_file=tables.open_file(file_name_base+'_JDF.h5','w')
     ParticleGroup=output_file.create_array('/','Particles',x_px_y_py_z_pz_NE)
     boundsGroup=output_file.create_group('/','globalGridGlobalLimits','')
     boundsGroup._v_attrs.vsType='limits'
