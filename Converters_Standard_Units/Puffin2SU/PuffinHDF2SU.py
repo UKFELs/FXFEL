@@ -53,7 +53,11 @@ m_WGHT = Electrons[:,6]
 
 x_su=m_X*np.sqrt(Lg*Lc)
 y_su=m_Y*np.sqrt(Lg*Lc)
-z_su=m_Z*Lc
+
+# Unflipping the z-axis to keep with SI units and original beam orientation
+z_su=(-1.0*m_Z*Lc)
+z_su=z_su-np.min(z_su)
+
 px_su=m*c*a_u*m_PX
 py_su=-1.0*m*c*a_u*m_PY
 gamma=m_GAMMA*gamma_Scale

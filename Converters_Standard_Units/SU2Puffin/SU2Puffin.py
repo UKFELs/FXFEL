@@ -179,7 +179,7 @@ m_Arr=np.vstack((x_bar,y_bar,z2,px_bar,py_bar,gamma/gamma_0,Ne)).T
 del x_bar,y_bar,px_bar,py_bar,gamma,z2,Ne
 gc.collect()
 
-output_file=tables.open_file(file_name_base+'_PuffinFLP.hdf','w')
+output_file=tables.open_file(file_name_base+'_Puffin.h5','w')
 # Create hdf5 file
 
 print 'Max Z2 value = ',np.max(m_Arr[:,2])
