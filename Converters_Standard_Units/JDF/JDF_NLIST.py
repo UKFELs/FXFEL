@@ -109,17 +109,17 @@ def HaltonRandomNumber(dim, nbpts):
     return h.reshape(nbpts, dim)
 
 
-def SliceCalculate(z_hlt,i,StepZ,NumberOfSlices,interpolator,f_Z,new_x,new_y,Non_Zero_Z,Num_Of_Slice_Particles,minz,JDFSmoothing,RandomHaltonSequence):
+def SliceCalculate(bin_x_in,bin_y_in,z_hlt,i,StepZ,NumberOfSlices,interpolator,f_Z,new_x,new_y,Non_Zero_Z,Num_Of_Slice_Particles,minz,JDFSmoothing,RandomHaltonSequence):
     print 'Slice ',i,' of ',NumberOfSlices
     new_z=np.full((1),(minz+(StepZ*i)))
     xx,yy,zz=np.meshgrid(new_x,new_y,new_z)
     positionsin = np.column_stack((xx.ravel('F'), yy.ravel('F'), zz.ravel('F'), interpolator(xx,yy,zz).ravel('F') ))
     xy_flat=np.vstack((positionsin[:,0], positionsin[:,1])).T
-    hist2d_flat,edges=np.histogramdd(xy_flat,bins=(100,100), weights=positionsin[:,3])
+    hist2d_flat,edges=np.histogramdd(xy_flat,bins=(bin_x_in,bin_y_in), weights=positionsin[:,3])
 #if np.sum(hist2d_flat)>0:
     Dist=hist2d_flat
-    Xin=np.linspace(np.min(positionsin[:,0]),np.max(positionsin[:,0]),100)
-    Yin=np.linspace(np.min(positionsin[:,1]),np.max(positionsin[:,1]),100)
+    Xin=np.linspace(np.min(positionsin[:,0]),np.max(positionsin[:,0]),bin_x_in)
+    Yin=np.linspace(np.min(positionsin[:,1]),np.max(positionsin[:,1]),bin_y_in)
     dots=[]
     ZZZ=minz+(i*StepZ)
     ZZZ_in=np.full((Num_Of_Slice_Particles),minz+(i*StepZ)+(StepZ*z_hlt))        
@@ -259,12 +259,12 @@ if __name__ == '__main__':
     
     lambda_u=(2.0*Pi)/k_u
     # Use plane-pole undulator
-    # lambda_r=(lambda_u/(2.0*gamma_0**2.0))*(1+(a_u**2.0)/2.0)
-    # print 'Using plane-pole undulator configuration !'
+    lambda_r=(lambda_u/(2.0*gamma_0**2.0))*(1+(a_u**2.0)/2.0)
+    print 'Using plane-pole undulator configuration !'
     
     # Use helical undulator
-    lambda_r=(lambda_u/(2*gamma_0**2))*(1+a_u**2)    
-    print 'Using helical undulator configuration !'
+    #lambda_r=(lambda_u/(2*gamma_0**2))*(1+a_u**2)    
+    #print 'Using helical undulator configuration !'
     print 'lambda_r = ',lambda_r
 
     NumberOfSlices=int(SlicesMultiplyFactor*((max(mA_Z)+S_factor*size_z)-(min(mA_Z)-S_factor*size_z))/(lambda_r))
@@ -272,7 +272,7 @@ if __name__ == '__main__':
     InitialParticleCharge=TotalNumberOfElectrons*e_ch
     
     Hz, edges_Z = np.histogram(mA_Z, bins = binnumber_Z,normed=False,weights=mA_WGHT,range=((min(mA_Z)-S_factor*size_z,max(mA_Z)+S_factor*size_z)))
-
+    Hz=ndimage.gaussian_filter(Hz,1.0)
     Non_Zero_Z=float(np.count_nonzero(Hz))
     #x0_Z = np.linspace(0.5*(edges_Z[0][0]+edges_Z[0][1]),0.5*(edges_Z[0][binnumber_Z]+edges_Z[0][binnumber_Z-1]),binnumber_Z)
     x0_Z = np.linspace(0.5*(edges_Z[0]+edges_Z[1]),0.5*(edges_Z[binnumber_Z]+edges_Z[binnumber_Z-1]),binnumber_Z)
@@ -342,7 +342,7 @@ if __name__ == '__main__':
             slice_list.append(slice_number)
     
     for slice_number in slice_list:
-        pool.apply_async(SliceCalculate, args=(z_hlt[:,1],slice_number,StepZ,NumberOfSlices,interpolator,f_Z,new_x,new_y,Non_Zero_Z,Num_Of_Slice_Particles,minz,JDFSmoothing,RandomHaltonSequence), callback=result2.append)
+        pool.apply_async(SliceCalculate, args=(binnumber_X,binnumber_Y,z_hlt[:,1],slice_number,StepZ,NumberOfSlices,interpolator,f_Z,new_x,new_y,Non_Zero_Z,Num_Of_Slice_Particles,minz,JDFSmoothing,RandomHaltonSequence), callback=result2.append)
     pool.close()
     pool.join()
     
@@ -393,7 +393,7 @@ if __name__ == '__main__':
         Full_PY = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PY.ravel(),(Full_X, Full_Y, Full_Z), method='nearest',rescale=True)
         return Full_PY
     def Calculate_PZ(): 
-        Full_PZ = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PZ.ravel(),(Full_X, Full_Y, Full_Z), method='linear',rescale=True)
+        Full_PZ = interpolate.griddata((mA_X.ravel(), mA_Y.ravel(), mA_Z.ravel()),mA_PZ.ravel(),(Full_X, Full_Y, Full_Z), method='nearest',rescale=True)
         return Full_PZ
     
     from multiprocessing.pool import ThreadPool

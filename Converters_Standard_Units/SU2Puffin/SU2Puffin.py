@@ -25,6 +25,8 @@ f=tables.open_file(file_name_in,'r')
 Electrons=f.root.Particles.read()
 n=len(Electrons)
 
+
+
 c=3.0e+8
 m=9.11e-31
 e_ch=1.602e-19              # charge of one electron
@@ -103,8 +105,8 @@ e_ch=1.602e-19
 c=299792458.0
 m=9.11e-31
 Pi=np.pi
-k_u=228.4727               # Undulator wave number default=628 k_u=2*Pi/l_w
-a_u=1.0121809              # undulator parameter ? a_u=a_w
+k_u=228.48               # Undulator wave number default=628 k_u=2*Pi/l_w
+a_u=2.12              # undulator parameter ? a_u=a_w
 e_0=8.854E-12              # vacuum permitivity
 p_tot=np.sqrt((m_PX[:]**2.0)+(m_PY[:]**2.0)+(m_PZ[:]**2.0))
 
@@ -118,11 +120,11 @@ gamma_0=np.mean(gamma)
 print 'Gamma= ',gamma_0
 
 
-rho=(1/gamma_0)*(((a_u*omega_p)/(4*c*k_u))**(2.0/3.0))
+rho=(1.0/gamma_0)*(((a_u*omega_p)/(4*c*k_u))**(2.0/3.0))
 #Temporary change of rho to rho = 0.005
-#rho = 0.0050
+# rho = 0.010
 
-lambda_u=(2*Pi)/k_u
+lambda_u=(2.0*Pi)/k_u
 
 # Calculated for planar undulator -> (1+(a^2)/2)
 lambda_r=(lambda_u/(2.0*gamma_0**2.0))*(1+(a_u**2.0)/2.0)
@@ -143,11 +145,9 @@ z2=m_Z/Lc
 
 # Find minimum of z2 and rescale z2 to start from 0.01
 # Flip the beam to keep proper direction in Puffin (z-ct)
-min_z2=min(z2)
-mean_z2=np.mean(z2)
-z2=(mean_z2-z2)+min_z2
-min_z22=min(z2)
-z2=z2-min_z22+0.01
+z2=-1.0*z2
+z2=z2-np.min(z2)+0.01
+
 
 x_bar=m_X[:]/(np.sqrt(Lg*Lc))
 y_bar=m_Y[:]/(np.sqrt(Lg*Lc))
@@ -169,13 +169,17 @@ Ne=m_WGHT[:]/(Peak_Concentration*Lg*Lc*Lc)          # weight number of electrons
 del m_X, m_PX, m_Y, m_PY, m_Z, m_PZ, m_WGHT,p_tot 
 gc.collect()
 
+
+
+
 # Combine all read arrays into one
 m_Arr=np.vstack((x_bar,y_bar,z2,px_bar,py_bar,gamma/gamma_0,Ne)).T
+#m_Arr[:,5]=1.0
 
 del x_bar,y_bar,px_bar,py_bar,gamma,z2,Ne
 gc.collect()
 
-output_file=tables.open_file(file_name_base+'_Puffin.hdf','w')
+output_file=tables.open_file(file_name_base+'_PuffinFLP.hdf','w')
 # Create hdf5 file
 
 print 'Max Z2 value = ',np.max(m_Arr[:,2])
